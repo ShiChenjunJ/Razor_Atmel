@@ -29,7 +29,7 @@ extern volatile u32 G_au32ButtonDebounceTimeStart[TOTAL_BUTTONS];  /* From butto
 Global variable definitions with scope limited to this local application.
 Variables names shall start with "ISR_" and be declared as static.
 ***********************************************************************************************************************/
-
+static u32 ISR_ButtonInterruptCounter=0;
 
 /**********************************************************************************************************************
 Interrupt Service Routine Definitions
@@ -191,7 +191,8 @@ void PIOA_IrqHandler(void)
   
   /* Check if any port A buttons interrupted */
   if(u32ButtonInterrupts)
-  {
+  {  
+    ISR_ButtonInterruptCounter++;
     /* Parse through all the buttons to find those that have interrupted */
     for(u8 i = 0; i < TOTAL_BUTTONS; i++)
     {

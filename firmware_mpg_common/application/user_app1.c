@@ -135,7 +135,52 @@ State Machine Function Definitions
 /*-------------------------------------------------------------------------------------------------------------------*/
 /* Wait for ??? */
 static void UserApp1SM_Idle(void)
-{
+{ u32 au32Speed[10]={250,125,62,31,15,31,62,125,250,500};
+  static u32 u32Counter1_Hz=0;
+  static u32 u32Counter2_Time=0;
+  static bool bLight=FALSE;
+  static u32 u32Hz=500;
+  static u8 u8Whichspeed=0;
+  
+  u32Counter1_Hz++;
+  u32Counter2_Time++;
+  
+  
+  
+  if(u32Hz==u32Counter1_Hz)
+   {
+     if(bLight)
+     {
+       HEARTBEAT_ON();
+       u32Counter1_Hz=0;
+     }
+     else
+     {
+       HEARTBEAT_OFF();
+       u32Counter1_Hz=0;
+     }
+   
+     bLight=!bLight;
+   }
+     if(u32Counter2_Time==2000)
+     {
+       if(u8Whichspeed==9)
+       {
+         u8Whichspeed=0;
+       }
+       
+       u32Hz=au32Speed[u8Whichspeed];
+       u8Whichspeed++;
+       
+       
+       
+       u32Counter1_Hz=0;
+       u32Counter2_Time=0;
+     }
+     
+         
+       
+  
 
 } /* end UserApp1SM_Idle() */
     
