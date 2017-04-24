@@ -136,50 +136,81 @@ State Machine Function Definitions
 /* Wait for ??? */
 static void UserApp1SM_Idle(void)
 { 
-  u8 u8Stop = 0;
-     static u32 u32Cycle = 0;
-     static u32 u32Counter = 0;
-     static bool bLightOn = 0;
-     static u32 u32Counter1 = 0;
-     u32 au32Time[11] = {500,250,125,68,34,15,34,68,125,250,500};
-     u32Counter++;
-     u32Counter1++;
-/* When time to 2s, let the number in the array point to the next one*/     
-      if(u32Counter1/2000 == 1)
-      {
-        u32Cycle++;
-        u32Counter1 = 0;
-        u32Counter = 0;
-      }
-/*Let the flashing time be the time I want, this time in the array*/  
-      if(u32Counter == au32Time[u32Cycle])
-      {
-        u8Stop = 1;
-      }
+  
+   static u32 u32CounterLimit=480; 
+  static u32 u32Counter1=0,u32Counter2=0,u32LoopCount=0;
+  static bool bLightOn=FALSE;
+  u32Counter1++;
+  u32Counter2++;
+  if((u32LoopCount / 1920) >=5)
+  {
+    u32LoopCount++;
+if((u32LoopCount/1920)==11)
+{
+    u32LoopCount=0;
+     u32Counter1=0;
+}
+      if(u32Counter2==u32CounterLimit)
+       {   
+         u32Counter2=0;
+         
+         if(bLightOn)
+          {
+            HEARTBEAT_OFF();
+          }
+         else
+          {
+            HEARTBEAT_ON();
+           }
+            bLightOn=!bLightOn;
       
+         
+        }
+      if(u32Counter1 == 1920)
+      {
+       
       
-    while(u8Stop)
+        u32CounterLimit=u32CounterLimit*2;
+        
+         u32Counter1=0;
+         
+      }
+           
+        
+   
+    
+  }
+  else
+  {
+    
+    
+    
+       u32LoopCount++;
+   
+      if(u32Counter2==u32CounterLimit)
+       {   
+         u32Counter2=0;
+         if(bLightOn)
+          {
+            HEARTBEAT_OFF();
+          }
+         else
+          {
+            HEARTBEAT_ON();
+           }
+            bLightOn=!bLightOn;
+      
+         
+        }
+       if(u32Counter1==1920)
     {
-          
-     
-           if(bLightOn)
-             {
-                 HEARTBEAT_OFF();
-             }
-             else
-             {
-                 HEARTBEAT_ON();
-             }
-             bLightOn = !bLightOn;
-             u32Counter = 0;
-             if(u32Cycle == 10)
-              {
-                  u32Cycle = 0;
-              }
-             u8Stop = 0;
-                                   
-
+        u32CounterLimit=u32CounterLimit/2;
+        u32Counter1=0;
     }
+    
+  }                                
+
+    
      
          
        
