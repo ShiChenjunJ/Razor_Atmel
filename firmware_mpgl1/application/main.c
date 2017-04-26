@@ -40,10 +40,7 @@ the 1ms period.
 ***********************************************************************************************************************/
 
 void main(void)
-{ s8 s8Counter=0;
-  u8 u8Counter=0;
-  u32 u32Counter
-  bool bStatus
+{ 
   G_u32SystemFlags |= _SYSTEM_INITIALIZING;
 
   /* Low level initialization */
@@ -109,9 +106,9 @@ void main(void)
     UserApp3RunActiveState();
     
     /* System sleep*/
-    HEARTBEAT_OFF();
+    //HEARTBEAT_OFF();
     SystemSleep();
-    HEARTBEAT_ON();
+    //HEARTBEAT_ON();
     
   } /* end while(1) main super loop */
   
