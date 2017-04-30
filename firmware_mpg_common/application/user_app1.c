@@ -98,7 +98,14 @@ void UserApp1Initialize(void)
     /* The task isn't properly initialized, so shut it down and don't run */
     UserApp1_StateMachine = UserApp1SM_FailedInit;
   }
-
+  LedOff(WHITE);
+  LedOff(PURPLE);
+  LedOff(BLUE);
+  LedOff(CYAN);
+  LedOff(GREEN);
+  LedOff(YELLOW);
+  LedOff(ORANGE);
+  LedOff(RED);
 } /* end UserApp1Initialize() */
 
   
@@ -127,6 +134,31 @@ void UserApp1RunActiveState(void)
 /* Private functions                                                                                                  */
 /*--------------------------------------------------------------------------------------------------------------------*/
 
+/*Read the code which we input.*/
+static void ReadButton(void)
+      {  
+            u8 u8Button_Value=9;
+              
+             if(WasButtonPressed(BUTTON0))
+             {
+                ButtonAcknowledge(BUTTON0);
+                u8ButtonValue = 1;
+             }
+             
+             if(WasButtonPressed(BUTTON1))
+             {
+              ButtonAcknowledge(BUTTON1);
+              u8ButtonValue = 2;
+             }
+             
+             if(WasButtonPressed(BUTTON2))
+             {
+              ButtonAcknowledge(BUTTON2);
+              u8ButtonValue = 3;
+             }
+             
+             return u8Button_Value;
+      }
 
 /**********************************************************************************************************************
 State Machine Function Definitions
@@ -136,7 +168,65 @@ State Machine Function Definitions
 /* Wait for ??? */
 static void UserApp1SM_Idle(void)
 {
+static u8 u8ButtonValue=0;  
+static u8 u8Counter1=0;
+static u8 u8Counter2=0;
+static u8 u8Lenght_of_Code=0;
+static u8 au8True_Password[]={1,1,1,1,1,1};
+static u8 au8Input_Password[]={9,9,9,9,9,9};
+static u32 u32HeldTime=1000;
+static b bSetup=FALSE;
+static b bInput=FALSE;
+ 
+u8ButtonValue=ReadButton();
+u8Lenght_of_Code=(sizeof(au8True_Password)/sizeof(au8True_Password[0]);
 
+/*Choose the settings or import*/
+ if(u8Counter==0&&IsButtonHeld(BUTTON3,u32HeldTime))
+ {
+  bSetup=TRUE;
+  bInput=FALSE;
+ }
+ else
+ {
+  bSetup=FALSE;
+  bInput=TRUE; 
+ }
+
+/*Set up the new code*/
+ if(bSetup)
+ {
+   LedBlink(RED,LED_1HZ);
+   LedBlink(GREEN,LED_1HZ);
+   
+   if(u8ButtonValue!=9)
+   {
+     au8True_Password[u8Counter1]=u8ButtonValue;
+     u8Counter++;
+     ?????????????????
+   }   
+ else
+ {
+  bInput=TRUE;
+  u8Counter1=0;
+ }
+  
+ /*Read the code*/
+  if(bInput)
+  {
+    RedOn(RED);
+    if(u8Counter2<u8Lenght_of_Code)
+    {
+      if(u8ButtonValue!=9)
+      {      
+       au8Input_Password[u8Counter2]=u8ButtonValue;
+       u8Counter2++;
+      }
+  
+  
+  
+  
+  
 } /* end UserApp1SM_Idle() */
     
 #if 0
