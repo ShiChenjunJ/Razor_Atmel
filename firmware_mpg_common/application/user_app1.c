@@ -98,6 +98,7 @@ void UserApp1Initialize(void)
     /* The task isn't properly initialized, so shut it down and don't run */
     UserApp1_StateMachine = UserApp1SM_FailedInit;
   }
+  
   LedOff(WHITE);
   LedOff(PURPLE);
   LedOff(BLUE);
@@ -106,6 +107,9 @@ void UserApp1Initialize(void)
   LedOff(YELLOW);
   LedOff(ORANGE);
   LedOff(RED);
+  
+  
+  
 } /* end UserApp1Initialize() */
 
   
@@ -133,32 +137,54 @@ void UserApp1RunActiveState(void)
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Private functions                                                                                                  */
 /*--------------------------------------------------------------------------------------------------------------------*/
-
-/*Read the code which we input.*/
-static void ReadButton(void)
+static  u8 ReadButton(void)
       {  
             u8 u8Button_Value=9;
               
              if(WasButtonPressed(BUTTON0))
              {
                 ButtonAcknowledge(BUTTON0);
-                u8ButtonValue = 1;
+                u8Button_Value = 1;
              }
              
              if(WasButtonPressed(BUTTON1))
              {
               ButtonAcknowledge(BUTTON1);
-              u8ButtonValue = 2;
+              u8Button_Value = 2;
              }
              
              if(WasButtonPressed(BUTTON2))
              {
               ButtonAcknowledge(BUTTON2);
-              u8ButtonValue = 3;
+              u8Button_Value = 3;
              }
              
              return u8Button_Value;
       }
+
+static u8 u8Choose_MAX(u8 u8Lenght1,u8 u8Lenght2)
+{
+  u8 u8Max;
+  
+  if(u8Lenght1>u8Lenght2)
+  {
+    u8Max=u8Lenght1;
+  }
+  else
+  {
+    u8Max=u8Lenght2;
+  }
+  
+  return u8Max;
+  
+  
+}
+
+
+
+/*Read the code which we input.*/
+
+
 
 /**********************************************************************************************************************
 State Machine Function Definitions
@@ -168,64 +194,121 @@ State Machine Function Definitions
 /* Wait for ??? */
 static void UserApp1SM_Idle(void)
 {
-static u8 u8ButtonValue=0;  
-static u8 u8Counter1=0;
-static u8 u8Counter2=0;
+  static u8 u8ButtonValue=0;  
+static u32 u32Counter1=0;
+static u8 u8Counter2_Input=0;
+static u8 u8Counter3_Judge=0;
+static u8 u8Counter4_Right=0;
+
 static u8 u8Lenght_of_Code=0;
+static u8 u8Lenght_of_True=0;
+
 static u8 au8True_Password[]={1,1,1,1,1,1};
 static u8 au8Input_Password[]={9,9,9,9,9,9};
-static u32 u32HeldTime=1000;
-static b bSetup=FALSE;
-static b bInput=FALSE;
- 
+
+static u8 u8Max=0;
+
+static bool bInput=TRUE;
+static bool b_TRUE=FALSE;
+static bool b_WRONG=FALSE;
+static bool bChongzhi=FALSE;
+
 u8ButtonValue=ReadButton();
-u8Lenght_of_Code=(sizeof(au8True_Password)/sizeof(au8True_Password[0]);
 
-/*Choose the settings or import*/
- if(u8Counter==0&&IsButtonHeld(BUTTON3,u32HeldTime))
- {
-  bSetup=TRUE;
-  bInput=FALSE;
- }
- else
- {
-  bSetup=FALSE;
-  bInput=TRUE; 
- }
 
-/*Set up the new code*/
- if(bSetup)
- {
-   LedBlink(RED,LED_1HZ);
-   LedBlink(GREEN,LED_1HZ);
-   
-   if(u8ButtonValue!=9)
-   {
-     au8True_Password[u8Counter1]=u8ButtonValue;
-     u8Counter++;
-     ?????????????????
-   }   
- else
- {
-  bInput=TRUE;
-  u8Counter1=0;
- }
-  
+u8Lenght_of_Code=(sizeof(au8True_Password)/sizeof(au8True_Password[0]));
+u8Lenght_of_True=(sizeof(au8Input_Password)/sizeof(au8Input_Password[0]));
+
+
  /*Read the code*/
+
   if(bInput)
   {
-    RedOn(RED);
-    if(u8Counter2<u8Lenght_of_Code)
-    {
+     LedOn(RED);
+     LedOff(GREEN);
+    
       if(u8ButtonValue!=9)
       {      
-       au8Input_Password[u8Counter2]=u8ButtonValue;
-       u8Counter2++;
+       au8Input_Password[u8Counter2_Input]=u8ButtonValue;
+       u8Counter2_Input++;
       }
+      
+       if(WasButtonPressed(BUTTON3))
+     {
+       ButtonAcknowledge(BUTTON3);
+       bInput=FALSE;
+       u8Counter2_Input=0;
+     }
+    }
+      
+/*Judge the code*/
+  else
+  {
+    u8Max=u8Choose_MAX(u8Lenght_of_Code,u8Lenght_of_True);
+   
+    for(;u8Counter3_Judge<u8Max;u8Counter3_Judge++)
+      {
+       if(au8True_Password[u8Counter3_Judge]==au8Input_Password[u8Counter3_Judge])
+       {
+         u8Counter4_Right++;
+       }
+      }  
+       
+       if(u8Counter4_Right==u8Lenght_of_True)
+       { 
+         b_TRUE=TRUE;
+       }
+       else
+       {
+        b_WRONG=TRUE;
+       }
+    }
   
-  
-  
-  
+   if(b_TRUE)
+    { u32Counter1++;
+      LedOff(RED);
+      
+      if(u32Counter1==500)
+      {
+        u32Counter1=0;
+        LedToggle(GREEN);
+      }
+      bChongzhi=TRUE;
+    }
+    if(b_WRONG)
+    { u32Counter1++;
+      LedOff(GREEN);
+     
+      if(u32Counter1==1000)
+      {
+        u32Counter1=0;
+        LedToggle(RED);
+      }
+      bChongzhi=TRUE;
+     }
+        
+  if((!bInput)&&bChongzhi)
+  {
+    if(u8ButtonValue!=9)
+   {
+    bInput=TRUE;
+    bChongzhi=FALSE;
+    b_TRUE=FALSE;
+    b_WRONG=FALSE;
+    u32Counter1=0;
+    }
+    if(WasButtonPressed(BUTTON3))
+   {
+    ButtonAcknowledge(BUTTON3); 
+    bInput=TRUE;
+    bChongzhi=FALSE;
+    b_TRUE=FALSE;
+    b_WRONG=FALSE;
+    u32Counter1=0;
+    }
+  }
+
+      
   
 } /* end UserApp1SM_Idle() */
     
