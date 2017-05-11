@@ -126,7 +126,68 @@ void UserApp1RunActiveState(void)
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Private functions                                                                                                  */
 /*--------------------------------------------------------------------------------------------------------------------*/
+extern u8 G_u8DebugScanfCharCount;
 
+/*Judge the digits of the decimal number*/
+static u32 u32NumberDigit(u32 u32Number)
+{
+  u8 u8Digit=0;
+  
+  while(u32Number)
+  {
+    u32Number=(u32Number/10);
+    u8Digit++;
+  }
+  
+  return u8Digit;
+}
+
+/*Make the border*/
+static void OutputBorder(u8 au8String[],u8 u8Digit)
+{
+  u8 u8Counter3;
+  u8Digit=(u8Digit+2);
+  for(u8Counter3=0;u8Counter3<u8Digit;u8Counter3++)
+  {
+    au8String[u8Counter3]='*';
+  }
+}
+
+/*shift the word*/
+static void Shift(u8 au8String1[],u8 au8String2[])
+{
+  u8 u8Location1;
+  
+    for(u8Location1=0;u8Location1<2;u8Location1++)
+    {
+      au8String1[u8Location1]=au8String1[u8Location1+1];
+    }
+    
+    au8String1[2]=au8String2[0];
+}
+
+/*judge the two strings*/
+static bool StringSame(u8 au8String3[],u8 au8String4[])
+{
+  u8 u8Location2;
+  u8 u8Counter=0;
+  bool bSame=FALSE;
+  
+  for(u8Location2=0;u8Location2<4;u8Location2++)
+  {
+    if(au8String3[u8Location2]==au8String4[u8Location2])
+    {
+      u8Counter++;
+    }
+  }
+  
+  if(u8Counter==4)
+  {
+    bSame=TRUE;
+  }
+  
+  return bSame;
+}
 
 /**********************************************************************************************************************
 State Machine Function Definitions
@@ -136,7 +197,69 @@ State Machine Function Definitions
 /* Wait for ??? */
 static void UserApp1SM_Idle(void)
 {
-
+static u8 u8Counter1=0;
+  static u8 u8TimesDigit=0;
+  
+  static u8 au8IsInputWord[1]="0";
+  static u8 au8InputName[3]={0,0,0};
+  static u8 au8Name[3]={'s','s','j'};
+  
+  static u8 au8Border[100]="0";
+  static u8 au8Border2[]="\n\r";
+  static u8 au8Border3[1];
+  
+  static u32 u32CounterOfName=0;
+  static bool bNameAppear=FALSE;
+  
+  au8Border3[0]='*';
+  
+/*Read the word and recognize the name*/ 
+  if(G_u8DebugScanfCharCount==1)
+  { 
+    DebugScanf(au8IsInputWord);
+    
+    if(u8Counter1<3)
+    {
+      au8InputName[u8Counter1]=au8IsInputWord[0];
+      
+      if(u8Counter1==2)
+      {
+        bNameAppear=StringSame(au8InputName,au8Name);
+      }
+        
+      u8Counter1++;
+    }
+  else
+    {
+      Shift(au8InputName,au8IsInputWord);
+      bNameAppear=StringSame(au8InputName,au8Name);
+      
+    }
+  
+  /*Output the times of Name*/
+  if(bNameAppear)
+  {
+    
+    u32CounterOfName++;
+    u8TimesDigit=u32NumberDigit(u32CounterOfName);
+    
+    OutputBorder(au8Border,u8TimesDigit);
+    
+    DebugPrintf(au8Border2);
+    DebugPrintf(au8Border);
+    DebugPrintf(au8Border2);
+    DebugPrintf(au8Border3);
+    DebugPrintNumber(u32CounterOfName);
+    DebugPrintf(au8Border3);
+    DebugPrintf(au8Border2);
+    DebugPrintf(au8Border);
+    DebugPrintf(au8Border2);
+   
+    u8Counter1=0;
+    bNameAppear=FALSE;
+  }
+  
+ }
 } /* end UserApp1SM_Idle() */
     
 #if 0
