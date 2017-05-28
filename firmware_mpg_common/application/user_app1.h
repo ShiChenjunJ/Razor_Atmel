@@ -49,14 +49,21 @@ void UserApp1RunActiveState(void);
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Private functions                                                                                                  */
 /*--------------------------------------------------------------------------------------------------------------------*/
-
+bool bCheck(u8 au8String[]);
+void Reset(u8 au8String2[]);
+u8 ReadLed(u8 au8String3[]);
+u32 ReadOntime(u8 au8String4[]);
+u32 ReadOfftime(u8 au8String5[]);
 
 /***********************************************************************************************************************
 State Machine Declarations
 ***********************************************************************************************************************/
-static void UserApp1SM_Idle(void);    
+static void UserApp1SM_Idle(void);
 
-static void UserApp1SM_Error(void);         
+static void UserApp1SM_CreatLedList(void);
+static void UserApp1SM_PrintLedList(void);
+
+static void UserApp1SM_Error(void); 
 static void UserApp1SM_FailedInit(void);        
 
 
