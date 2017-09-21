@@ -49,13 +49,18 @@ void UserApp1RunActiveState(void);
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Private functions                                                                                                  */
 /*--------------------------------------------------------------------------------------------------------------------*/
-
+void ChangeState(void);
+void CloseAllLED(void);
+void LCD_orange(void);
+void LCD_purple(void);
+void CLEARDebug(void);
 
 /***********************************************************************************************************************
 State Machine Declarations
 ***********************************************************************************************************************/
-static void UserApp1SM_Idle(void);    
-
+   
+static void UserApp1SM_state1(void);    
+static void UserApp1SM_state2(void); 
 static void UserApp1SM_Error(void);         
 static void UserApp1SM_FailedInit(void);        
 
