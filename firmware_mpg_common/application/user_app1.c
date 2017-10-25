@@ -168,7 +168,29 @@ void UserApp1RunActiveState(void)
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Private functions                                                                                                  */
 /*--------------------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------
+Function DisplayLCDNumber()
 
+Description:use to display number(DEC).
+
+Requires:
+  - u32Number
+
+Promises:
+  - 
+*/
+void DisplayLCDNumber(u32 u32Number,u8 *pau8Number)
+{
+  u32 u32Divider = 100000000;
+  
+  for(u8 i=0;i<9;i++)
+  {
+    *(pau8Number+i)=u32Number/u32Divider+'0';
+    u32Number=u32Number%u32Divider;
+    u32Divider=u32Divider/10;
+  }
+  
+}
 
 /**********************************************************************************************************************
 State Machine Function Definitions
@@ -201,6 +223,8 @@ static void UserApp1SM_Idle(void)
   static u8 au8TestMessage[] = {0x5B, 0, 0, 0, 0xA5, 0, 0, 0};
   static u8 u8CurrentEventCodeExample=0x03;
 
+  static u32 u32ALLnumber=0;
+  static u32 u32FAILnumber=0;
   static u8 au8AllMessages[9]="000000000";
   static u8 au8FailMessages[9]="000000000";
   u8 au8DataContent[] = "xxxxxxxxxxxxxxxx";
@@ -261,53 +285,8 @@ static void UserApp1SM_Idle(void)
       /*The number of failed messages*/
       u8CurrentEventCodeExample = G_au8AntApiCurrentMessageBytes[ANT_TICK_MSG_EVENT_CODE_INDEX];
       if(u8CurrentEventCodeExample==EVENT_TRANSFER_TX_FAILED)
-      {
-        au8FailMessages[8]++;
-        if(au8FailMessages[8]==('9'+1))
-        {
-          au8FailMessages[8]='0';
-          au8FailMessages[7]++;
-          if(au8FailMessages[7]==('9'+1))
-          {
-            au8FailMessages[7]='0';
-            au8FailMessages[6]++;
-            if(au8FailMessages[6]==('9'+1))
-            {
-              au8FailMessages[6]='0';
-              au8FailMessages[5]++;
-              if(au8FailMessages[5]==('9'+1))
-              {
-                au8FailMessages[5]='0';
-                au8FailMessages[4]++;
-                if(au8FailMessages[4]==('9'+1))
-                {
-                    au8FailMessages[4]='0';
-                    au8FailMessages[3]++;
-                    if(au8FailMessages[3]==('9'+1))
-                    {
-                      au8FailMessages[3]='0';
-                      au8FailMessages[2]++;
-                      if(au8FailMessages[2]==('9'+1))
-                      {
-                          au8FailMessages[2]='0';
-                          au8FailMessages[1]++;
-                          if(au8FailMessages[1]==('9'+1))
-                          {
-                            au8FailMessages[1]='0';
-                            au8FailMessages[0]++;
-                            if(au8FailMessages[0]==('9'+1))
-                            {
-                              au8FailMessages[0]='0';
-                            }
-                          }
-                      }
-                    }
-                }
-              }
-            }
-          }
-        }
-        
+      { 
+        u32FAILnumber++;
         au8TestMessage[3]++;
         if(au8TestMessage[3] == 0)
         {
@@ -319,52 +298,7 @@ static void UserApp1SM_Idle(void)
         }
       }
       /*The number of all messages*/
-      au8AllMessages[8]++;
-      if(au8AllMessages[8]==('9'+1))
-      {
-         au8AllMessages[8]='0';
-         au8AllMessages[7]++;
-         if(au8AllMessages[7]==('9'+1))
-         {
-          au8AllMessages[7]='0';
-          au8AllMessages[6]++;
-          if(au8AllMessages[6]==('9'+1))
-          {
-            au8AllMessages[6]='0';
-            au8AllMessages[5]++;
-            if(au8AllMessages[5]==('9'+1))
-            {
-               au8AllMessages[5]='0';
-               au8AllMessages[4]++;
-               if(au8AllMessages[4]==('9'+1))
-               {
-                  au8AllMessages[4]='0';
-                  au8AllMessages[3]++;
-                  if(au8AllMessages[3]==('9'+1))
-                  {
-                     au8AllMessages[3]='0';
-                     au8AllMessages[2]++;
-                     if(au8AllMessages[2]==('9'+1))
-                     {
-                        au8AllMessages[2]='0';
-                        au8AllMessages[1]++;
-                        if(au8AllMessages[1]==('9'+1))
-                        {
-                           au8AllMessages[1]='0';
-                           au8AllMessages[0]++;
-                           if(au8AllMessages[0]==('9'+1))
-                           {
-                            au8AllMessages[0]='0';
-                           }
-                        }
-                     }
-                  }
-               }
-            }
-          }
-         }
-      }
-                        
+      u32ALLnumber++;                  
       au8TestMessage[7]++;
       if(au8TestMessage[7] == 0)
       {
@@ -375,10 +309,11 @@ static void UserApp1SM_Idle(void)
         }
       }
       AntQueueAcknowledgedMessage(ANT_CHANNEL_USERAPP, au8TestMessage);
-      
-      LCDMessage(0x4B,au8FailMessages);
+
+      DisplayLCDNumber(u32ALLnumber,au8AllMessages);
       LCDMessage(0x41,au8AllMessages);
-      
+      DisplayLCDNumber(u32FAILnumber,au8FailMessages);
+      LCDMessage(0x4B,au8FailMessages);
 
     }
   } /* end AntReadData() */
