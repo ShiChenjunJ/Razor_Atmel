@@ -252,7 +252,16 @@ static void UserApp1SM_Idle(void)
   {
     /* Got the button, so complete one-time actions before next state */
     ButtonAcknowledge(BUTTON0);
-    
+    if(ANT_CHANNEL_TYPE_USERAPP)
+    {
+      LCDCommand(LCD_CLEAR_CMD);
+      LCDMessage(LINE1_START_ADDR,"       !Hide!       ");     
+    }
+    else
+    {
+      LCDCommand(LCD_CLEAR_CMD);
+      LCDMessage(LINE1_START_ADDR,"       Seeker      ");   
+    }
     /* Queue open channel and change LED0 from yellow to blinking green to indicate channel is opening */
     AntOpenChannelNumber(ANT_CHANNEL_USERAPP);
 
@@ -265,7 +274,16 @@ static void UserApp1SM_Idle(void)
     UserApp1_u32Timeout = G_u32SystemTime1ms;
     UserApp1_StateMachine = UserApp1SM_WaitChannelOpen;
   }
-    
+  
+  /*
+    if(WasButtonPressed(BUTTON3))
+  {
+    ButtonAcknowledge(BUTTON3);
+    AntCloseChannelNumber(ANT_CHANNEL_USERAPP);
+    AntUnassignChannelNumber(ANT_CHANNEL_USERAPP);
+    UserApp1_StateMachine = UserApp1Initialize;
+  }
+  */
 } /* end UserApp1SM_Idle() */
      
 
@@ -279,7 +297,7 @@ static void UserApp1SM_WaitChannelOpen(void)
 #ifdef MPG1
     LedOn(GREEN);
 #endif /* MPG1 */    
-
+    
     UserApp1_StateMachine = UserApp1SM_ChannelOpen;
   }
   
