@@ -29,7 +29,7 @@ Type Definitions
 Constants / Definitions
 **********************************************************************************************************************/
 /* Required constants for ANT channel configuration */
-#define ANT_CHANNEL_USERAPP_SEEKER        ANT_CHANNEL_0         /* Channel 0 - 7 */
+#define ANT_CHANNEL_USERAPP_SEEKER        ANT_CHANNEL_2         /* Channel 0 - 7 */
 #define ANT_CHANNEL_USERAPP_HIDER         ANT_CHANNEL_1         /* Channel 0 - 7 */
 
 #define ANT_CHANNEL_TYPE_USERAPP_SEEKER   CHANNEL_TYPE_SLAVE    /* ANT SLAVE */
@@ -63,6 +63,7 @@ Function Declarations
 /* Protected functions                                                                                                */
 /*--------------------------------------------------------------------------------------------------------------------*/
 void UserApp1Initialize(void);
+void UserApp1Initialize2(void);
 void UserApp1RunActiveState(void);
 
 
