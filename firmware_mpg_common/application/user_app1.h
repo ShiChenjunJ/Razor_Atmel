@@ -29,8 +29,8 @@ Type Definitions
 Constants / Definitions
 **********************************************************************************************************************/
 /* Required constants for ANT channel configuration */
-#define ANT_CHANNEL_USERAPP_SEEKER        ANT_CHANNEL_2         /* Channel 0 - 7 */
-#define ANT_CHANNEL_USERAPP_HIDER         ANT_CHANNEL_1         /* Channel 0 - 7 */
+#define ANT_CHANNEL_USERAPP_SEEKER        ANT_CHANNEL_1         /* Channel 0 - 7 */
+#define ANT_CHANNEL_USERAPP_HIDER         ANT_CHANNEL_2         /* Channel 0 - 7 */
 
 #define ANT_CHANNEL_TYPE_USERAPP_SEEKER   CHANNEL_TYPE_SLAVE    /* ANT SLAVE */
 #define ANT_CHANNEL_TYPE_USERAPP_MASTER   CHANNEL_TYPE_MASTER   /* ANT MASTER */
@@ -74,7 +74,8 @@ void UserApp1RunActiveState(void);
 /***********************************************************************************************************************
 State Machine Declarations
 ***********************************************************************************************************************/
-static void UserApp1SM_WaitChannelAssign(void);
+static void UserApp1SM_WaitChannelAssign_Seeker(void);
+static void UserApp1SM_WaitChannelAssign_Master(void);
 static void UserApp1SM_Idle(void);    
 static void UserApp1SM_WaitChannelOpen(void);
 static void UserApp1SM_ChannelOpen(void);
@@ -83,6 +84,7 @@ static void UserApp1SM_WaitChannelClose(void);
 static void UserApp1SM_Error(void);         
 static void UserApp1SM_FailedInit(void);        
 
+static void UserApp1SM_Wait10s(void);
 
 #endif /* __USER_APP_H */
 
