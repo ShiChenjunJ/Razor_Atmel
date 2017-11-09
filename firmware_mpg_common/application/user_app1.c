@@ -146,7 +146,7 @@ void UserApp1Initialize(void)
   }
     
   /* If good initialization, set state to Idle */
-  if( AntAssignChannel(&sAntSetupData_Seeker))
+  if( AntAssignChannel(&sAntSetupData_Seeker) )
   {
       /* Channel assignment is queued so start timer */
 #ifdef EIE1
@@ -208,14 +208,23 @@ static void UserApp1SM_WaitChannelAssign(void)
   state_SEEKER=AntRadioStatusChannel(ANT_CHANNEL_USERAPP_SEEKER);
   state_HIDER=AntRadioStatusChannel(ANT_CHANNEL_USERAPP_HIDER);
   /* Check if the channel assignment is complete */
-  if((state_HIDER==ANT_CONFIGURED)&&(state_SEEKER==ANT_CONFIGURED))
+  if( state_SEEKER==ANT_CONFIGURED )
   {
-#ifdef EIE1
-    LedOff(RED);
-    LedOn(YELLOW);
-#endif /* EIE1 */
+    if( 1 )
+    {
+      /* Channel assignment is queued so start timer */
 
-    UserApp1_StateMachine = UserApp1SM_Idle;
+      UserApp1_u32Timeout = G_u32SystemTime1ms;
+      LedOn(RED);
+
+      if(state_HIDER==ANT_CONFIGURED )
+      {
+        LedOff(RED);
+        LedOn(YELLOW);
+
+        UserApp1_StateMachine = UserApp1SM_Idle;
+      }
+    }
   }
   
   /* Monitor for timeout */
