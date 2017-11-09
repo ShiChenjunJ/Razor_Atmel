@@ -63,7 +63,6 @@ Function Declarations
 /* Protected functions                                                                                                */
 /*--------------------------------------------------------------------------------------------------------------------*/
 void UserApp1Initialize(void);
-void UserApp1Initialize2(void);
 void UserApp1RunActiveState(void);
 
 

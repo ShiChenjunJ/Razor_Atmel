@@ -101,7 +101,7 @@ void UserApp1Initialize(void)
   u8 au8Instructions[] = "B0:Seeker  B1:Master";
   
   AntAssignChannelInfoType sAntSetupData_Seeker;
-  
+  AntAssignChannelInfoType sAntSetupData_Master;
   /* Clear screen and place start messages */
 #ifdef EIE1
   LCDCommand(LCD_CLEAR_CMD);
@@ -124,11 +124,25 @@ void UserApp1Initialize(void)
   sAntSetupData_Seeker.AntTransmissionType = ANT_TRANSMISSION_TYPE_USERAPP;
   sAntSetupData_Seeker.AntFrequency        = ANT_FREQUENCY_USERAPP;
   sAntSetupData_Seeker.AntTxPower          = ANT_TX_POWER_USERAPP;
+  /* Configure ANT for this application (master)*/
+  sAntSetupData_Master.AntChannel          = ANT_CHANNEL_USERAPP_HIDER;
+  sAntSetupData_Master.AntChannelType      = ANT_CHANNEL_TYPE_USERAPP_MASTER;
+  sAntSetupData_Master.AntChannelPeriodLo  = ANT_CHANNEL_PERIOD_LO_USERAPP;
+  sAntSetupData_Master.AntChannelPeriodHi  = ANT_CHANNEL_PERIOD_HI_USERAPP;
+  
+  sAntSetupData_Master.AntDeviceIdLo       = ANT_DEVICEID_LO_USERAPP;
+  sAntSetupData_Master.AntDeviceIdHi       = ANT_DEVICEID_HI_USERAPP;
+  sAntSetupData_Master.AntDeviceType       = ANT_DEVICE_TYPE_USERAPP;
+  sAntSetupData_Master.AntTransmissionType = ANT_TRANSMISSION_TYPE_USERAPP;
+  sAntSetupData_Master.AntFrequency        = ANT_FREQUENCY_USERAPP;
+  sAntSetupData_Master.AntTxPower          = ANT_TX_POWER_USERAPP;
 
+  sAntSetupData_Master.AntNetwork = ANT_NETWORK_DEFAULT;
   sAntSetupData_Seeker.AntNetwork = ANT_NETWORK_DEFAULT;
   for(u8 i = 0; i < ANT_NETWORK_NUMBER_BYTES; i++)
   {
     sAntSetupData_Seeker.AntNetworkKey[i] = ANT_DEFAULT_NETWORK_KEY;
+    sAntSetupData_Master.AntNetworkKey[i] = ANT_DEFAULT_NETWORK_KEY;
   }
     
   /* If good initialization, set state to Idle */
@@ -153,50 +167,7 @@ void UserApp1Initialize(void)
   }
 
 } /* end UserApp1Initialize() */
-void UserApp1Initialize2(void)
-{
-  AntAssignChannelInfoType sAntSetupData_Master;
-  /* Configure ANT for this application (master)*/
-  sAntSetupData_Master.AntChannel          = ANT_CHANNEL_USERAPP_HIDER;
-  sAntSetupData_Master.AntChannelType      = ANT_CHANNEL_TYPE_USERAPP_MASTER;
-  sAntSetupData_Master.AntChannelPeriodLo  = ANT_CHANNEL_PERIOD_LO_USERAPP;
-  sAntSetupData_Master.AntChannelPeriodHi  = ANT_CHANNEL_PERIOD_HI_USERAPP;
-  
-  sAntSetupData_Master.AntDeviceIdLo       = ANT_DEVICEID_LO_USERAPP;
-  sAntSetupData_Master.AntDeviceIdHi       = ANT_DEVICEID_HI_USERAPP;
-  sAntSetupData_Master.AntDeviceType       = ANT_DEVICE_TYPE_USERAPP;
-  sAntSetupData_Master.AntTransmissionType = ANT_TRANSMISSION_TYPE_USERAPP;
-  sAntSetupData_Master.AntFrequency        = ANT_FREQUENCY_USERAPP;
-  sAntSetupData_Master.AntTxPower          = ANT_TX_POWER_USERAPP;
 
-  sAntSetupData_Master.AntNetwork = ANT_NETWORK_DEFAULT;
-  for(u8 i = 0; i < ANT_NETWORK_NUMBER_BYTES; i++)
-  {
-    sAntSetupData_Master.AntNetworkKey[i] = ANT_DEFAULT_NETWORK_KEY;
-  }
-  
-  /* If good initialization, set state to Idle */
-  if( AntAssignChannel(&sAntSetupData_Master))
-  {
-      /* Channel assignment is queued so start timer */
-#ifdef EIE1
-      UserApp1_u32Timeout = G_u32SystemTime1ms;
-      LedOn(RED);
-#endif /* EIE1 */
-  
-      UserApp1_StateMachine = UserApp1SM_WaitChannelAssign;
-  }
-  else
-  {
-    /* The task isn't properly initialized, so shut it down and don't run */
-#ifdef EIE1
-    LedBlink(RED, LED_4HZ);
-#endif /* EIE1 */
-
-    UserApp1_StateMachine = UserApp1SM_Error;
-  }
-  
-}
 
 /*----------------------------------------------------------------------------------------------------------------------
 Function UserApp1RunActiveState()
