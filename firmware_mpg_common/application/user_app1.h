@@ -85,7 +85,7 @@ static void UserApp1SM_Error(void);
 static void UserApp1SM_FailedInit(void);        
 
 static void UserApp1SM_Wait10s(void);
-
+static void UserApp1SM_ChangeRole(void);
 #endif /* __USER_APP_H */
 
 

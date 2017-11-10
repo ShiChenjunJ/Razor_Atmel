@@ -74,6 +74,8 @@ static AntChannelNumberType ANT_CHANNEL_USERAPP;
 static AntAssignChannelInfoType sAntSetupData_Seeker;
 static AntAssignChannelInfoType sAntSetupData_Master;
 static u32 u32Time10s=0;
+
+static bool bNewgame=FALSE;
 /**********************************************************************************************************************
 Function Definitions
 **********************************************************************************************************************/
@@ -323,6 +325,7 @@ static void UserApp1SM_Wait10s(void)
     LCDMessage(LINE1_START_ADDR, "Ready or not?");
     LCDMessage(LINE2_START_ADDR, "Here I come!");
     LedOff(CYAN);
+    UserApp1_u32Timeout = G_u32SystemTime1ms;
     UserApp1_StateMachine = UserApp1SM_WaitChannelOpen;
   }
 
@@ -408,7 +411,7 @@ static void UserApp1SM_ChannelOpen(void)
      /* New data message: check what it is */
     if(G_eAntApiCurrentMessageClass == ANT_DATA)
     {
-      u8RSSI=G_sAntApiCurrentMassageExtData.s8RSSI
+      u8RSSI = 0-G_sAntApiCurrentMessageExtData.s8RSSI;
       UserApp1_u32DataMsgCount++;
       
       /* We are synced with a device, so blue is solid */
@@ -535,11 +538,11 @@ static void UserApp1SM_ChannelOpen(void)
   } /* end AntReadAppMessageBuffer() */
   
   
-  if((u8RSSI<50)&&( ANT_CHANNEL_USERAPP == ANT_CHANNEL_USERAPP_SEEKER ))
+  if((u8RSSI<45)&&( ANT_CHANNEL_USERAPP == ANT_CHANNEL_USERAPP_SEEKER ))
   {
     AntCloseChannelNumber(ANT_CHANNEL_USERAPP);
     u8LastState = 0xff;
-
+    bNewgame=TRUE;
 #ifdef MPG1
     LedOff(YELLOW);
     LedOff(BLUE);
@@ -582,6 +585,10 @@ static void UserApp1SM_WaitChannelClose(void)
 #endif /* MPG1 */
 
     UserApp1_StateMachine = UserApp1SM_Idle;
+    if(bNewgame)
+    {
+      UserApp1_StateMachine = UserApp1SM_ChangeRole;
+    }
   }
   
   /* Check for timeout */
@@ -598,7 +605,28 @@ static void UserApp1SM_WaitChannelClose(void)
     
 } /* end UserApp1SM_WaitChannelClose() */
 
+/*-------------------------------------------------------------------------------------------------------------------*/
+/* Wait for change role */
+static void UserApp1SM_ChangeRole(void)
+{
+  LCDCommand(LCD_CLEAR_CMD);
+  LCDMessage(LINE1_START_ADDR, "Hide and Go Seek!");
+  LCDMessage(LINE2_START_ADDR, "Press B0 to Start");
 
+   if( ANT_CHANNEL_USERAPP == ANT_CHANNEL_USERAPP_SEEKER )
+  {
+    ANT_CHANNEL_USERAPP = ANT_CHANNEL_USERAPP_HIDER;
+
+  }
+  
+  if( ANT_CHANNEL_USERAPP == ANT_CHANNEL_USERAPP_HIDER )
+  {
+    ANT_CHANNEL_USERAPP == ANT_CHANNEL_USERAPP_SEEKER;
+      
+  } 
+  
+  UserApp1_StateMachine = UserApp1SM_Idle;
+}
 /*-------------------------------------------------------------------------------------------------------------------*/
 /* Handle an error */
 static void UserApp1SM_Error(void)          
