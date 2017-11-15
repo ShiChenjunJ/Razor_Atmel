@@ -71,10 +71,15 @@ void UserApp1RunActiveState(void);
 /***********************************************************************************************************************
 State Machine Declarations
 ***********************************************************************************************************************/
-static void UserApp1SM_WaitChannelAssign(void);
+static void UserApp1SM_WaitChannel0Assign(void);
+static void UserApp1SM_CheckChannel0Assign(void);
+static void UserApp1SM_WaitChannel1Assign(void);
+static void UserApp1SM_CheckChannel1Assign(void);
+
 static void UserApp1SM_Idle(void);    
 static void UserApp1SM_WaitChannelOpen(void);
-static void UserApp1SM_ChannelOpen(void);
+static void UserApp1SM_seek(void);
+static void UserApp1SM_hide(void);
 static void UserApp1SM_WaitChannelClose(void);
 
 static void UserApp1SM_Error(void);         
