@@ -77,7 +77,9 @@ static void UserApp1SM_WaitChannel1Assign(void);
 static void UserApp1SM_CheckChannel1Assign(void);
 
 static void UserApp1SM_Idle(void);    
-static void UserApp1SM_WaitChannelOpen(void);
+static void UserApp1SM_WaitChannel0Open(void);
+static void UserApp1SM_WaitChannel1Open(void);
+static void UserApp1SM_Gamestart(void);
 static void UserApp1SM_seek(void);
 static void UserApp1SM_hide(void);
 static void UserApp1SM_WaitChannelClose(void);
