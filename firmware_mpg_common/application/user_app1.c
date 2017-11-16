@@ -417,8 +417,8 @@ static void UserApp1SM_seek(void)
         LCDClearChars(LINE2_START_ADDR, 20); 
         LCDMessage(LINE2_START_ADDR, au8DataContent); 
 #endif /* MPG1 */    
-
-        /* Update our local message counter and send the message back */
+if(1)
+{       /* Update our local message counter and send the message back */
         au8TestMessage[7]++;
         if(au8TestMessage[7] == 0)
         {
@@ -428,7 +428,7 @@ static void UserApp1SM_seek(void)
             au8TestMessage[5]++;
           }
         }
-        AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP, au8TestMessage);
+        AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP_HIDE, au8TestMessage);
 
         /* Check for a special packet and respond */
 #ifdef MPG1
@@ -454,7 +454,7 @@ static void UserApp1SM_seek(void)
           }
         }
 #endif /* MPG1 */    
-
+}
       } /* end if(bGotNewData) */
     } /* end if(G_eAntApiCurrentMessageClass == ANT_DATA) */
     
@@ -576,6 +576,10 @@ static void UserApp1SM_hide(void)
       LedOff(GREEN);
       LedOn(BLUE);
 
+      if(0)
+      {
+        
+        
       /* Check if the new data is the same as the old data and update as we go */
       bGotNewData = FALSE;
       for(u8 i = 0; i < ANT_APPLICATION_MESSAGE_BYTES; i++)
@@ -609,7 +613,6 @@ static void UserApp1SM_hide(void)
           }
         }
         AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP, au8TestMessage);
-
         /* Check for a special packet and respond */
 #ifdef MPG1
         if(G_au8AntApiCurrentMessageBytes[0] == 0xA5)
@@ -636,6 +639,9 @@ static void UserApp1SM_hide(void)
 #endif /* MPG1 */    
 
       } /* end if(bGotNewData) */
+      
+      
+      }
     } /* end if(G_eAntApiCurrentMessageClass == ANT_DATA) */
     
     else if(G_eAntApiCurrentMessageClass == ANT_TICK)
