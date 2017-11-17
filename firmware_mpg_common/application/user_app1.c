@@ -428,7 +428,7 @@ static void UserApp1SM_seek(void)
       /* Update our local message counter and send the message back */
         if(0)
         {
-          bReceive=AntQueueAcknowledgedMessage(ANT_CHANNEL_USERAPP_HIDE, au8TestMessage);
+          bReceive=AntQueueAcknowledgedMessage(ANT_CHANNEL_USERAPP_SEEK, au8TestMessage);
         }
         /* Check for a special packet and respond */
 #ifdef MPG1
@@ -593,6 +593,17 @@ static void UserApp1SM_hide(void)
      /* New data message: check what it is */
     if(G_eAntApiCurrentMessageClass == ANT_DATA)
     { 
+        au8TestMessage[7]++;
+        if(au8TestMessage[7] == 0)
+         {
+            au8TestMessage[6]++;
+            if(au8TestMessage[6] == 0)
+          {
+            au8TestMessage[5]++;
+          }
+         }
+        LCDMessage(LINE2_START_ADDR, au8TestMessage);
+        AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP_HIDE, au8TestMessage);
       /* We are synced with a device, so blue is solid */
       LedOff(GREEN);
       LedOn(BLUE);
@@ -601,6 +612,9 @@ static void UserApp1SM_hide(void)
 
       for(u8 i = 0; i < ANT_APPLICATION_MESSAGE_BYTES; i++)
       {
+        
+        
+        
         if(G_au8AntApiCurrentMessageBytes[i] != au8LastAntData[i])
         {
           au8LastAntData[i] = G_au8AntApiCurrentMessageBytes[i];
@@ -614,17 +628,7 @@ static void UserApp1SM_hide(void)
     
     else if(G_eAntApiCurrentMessageClass == ANT_TICK)
     {
-      au8TestMessage[7]++;
-      if(au8TestMessage[7] == 0)
-      {
-       au8TestMessage[6]++;
-       if(au8TestMessage[6] == 0)
-       {
-        au8TestMessage[5]++;
-       }
-      }
-      LCDMessage(LINE2_START_ADDR, au8TestMessage);
-      AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP_SEEK, au8TestMessage);
+
     } /* end else if(G_eAntApiCurrentMessageClass == ANT_TICK) */
     
   } /* end AntReadAppMessageBuffer() */
