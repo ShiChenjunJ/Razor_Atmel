@@ -106,7 +106,7 @@ void UserApp1Initialize(void)
  /* Configure ANT for this application */
   /*Seek Channel0*/
   sAntSetupData_hide.AntChannel          = ANT_CHANNEL_USERAPP_HIDE;
-  sAntSetupData_hide.AntChannelType      = CHANNEL_TYPE_MASTER;
+  sAntSetupData_hide.AntChannelType      = CHANNEL_TYPE_SLAVE;
   sAntSetupData_hide.AntChannelPeriodLo  = ANT_CHANNEL_PERIOD_LO_USERAPP;
   sAntSetupData_hide.AntChannelPeriodHi  = ANT_CHANNEL_PERIOD_HI_USERAPP;
   
@@ -120,7 +120,7 @@ void UserApp1Initialize(void)
   sAntSetupData_hide.AntNetwork = ANT_NETWORK_DEFAULT;
   /* Hide Channel1 */
   sAntSetupData_seek.AntChannel          = ANT_CHANNEL_USERAPP_SEEK;
-  sAntSetupData_seek.AntChannelType      = CHANNEL_TYPE_SLAVE;
+  sAntSetupData_seek.AntChannelType      = CHANNEL_TYPE_MASTER;
   sAntSetupData_seek.AntChannelPeriodLo  = ANT_CHANNEL_PERIOD_LO_USERAPP;
   sAntSetupData_seek.AntChannelPeriodHi  = ANT_CHANNEL_PERIOD_HI_USERAPP;
   
@@ -422,7 +422,7 @@ static void UserApp1SM_seek(void)
       {
         /* We got new data: show on LCD */
 #ifdef MPG1
-        LCDCommand(LCD_CLEAR_CMD); 
+        LCDCommand(LCD_CLEAR_CMD);
         LCDMessage(LINE2_START_ADDR, au8DataContent); 
 #endif /* MPG1 */    
       /* Update our local message counter and send the message back */
@@ -560,12 +560,11 @@ static void UserApp1SM_seek(void)
 /* Channel is open, so monitor data */
 static void UserApp1SM_hide(void)
 {
-  static u8 u8LastState = 0xff;
-  static u8 au8TickMessage[] = "EVENT x\n\r";  /* "x" at index [6] will be replaced by the current code */
+
   static u8 au8DataContent[] = "xxxxxxxxxxxxxxxx";
   static u8 au8LastAntData[ANT_APPLICATION_MESSAGE_BYTES] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
   static u8 au8TestMessage[] = {0, 0, 0, 0, 0xC5, 0, 0, 0};
-  bool bGotNewData;
+
 
   /* Check for BUTTON0 to close channel */
   if(WasButtonPressed(BUTTON0))
@@ -576,7 +575,6 @@ static void UserApp1SM_hide(void)
     /* Queue close channel and change LED to blinking green to indicate channel is closing */
     AntCloseChannelNumber(ANT_CHANNEL_USERAPP_SEEK);
     AntCloseChannelNumber(ANT_CHANNEL_USERAPP_HIDE);
-    u8LastState = 0xff;
 
 #ifdef MPG1
     LedOff(YELLOW);
@@ -594,63 +592,23 @@ static void UserApp1SM_hide(void)
   {
      /* New data message: check what it is */
     if(G_eAntApiCurrentMessageClass == ANT_DATA)
-    {
-      UserApp1_u32DataMsgCount++;
-      
+    { 
       /* We are synced with a device, so blue is solid */
       LedOff(GREEN);
       LedOn(BLUE);
       
       /* Check if the new data is the same as the old data and update as we go */
-      bGotNewData = FALSE;
+
       for(u8 i = 0; i < ANT_APPLICATION_MESSAGE_BYTES; i++)
       {
         if(G_au8AntApiCurrentMessageBytes[i] != au8LastAntData[i])
         {
-          bGotNewData = TRUE;
           au8LastAntData[i] = G_au8AntApiCurrentMessageBytes[i];
 
           au8DataContent[2 * i]     = HexToASCIICharUpper(G_au8AntApiCurrentMessageBytes[i] / 16);
           au8DataContent[2 * i + 1] = HexToASCIICharUpper(G_au8AntApiCurrentMessageBytes[i] % 16); 
         }
-      }
-      
-      if(bGotNewData)
-      {
-        /* We got new data: show on LCD */
-#ifdef MPG1
-        LCDClearChars(LINE2_START_ADDR, 20); 
-        LCDMessage(LINE2_START_ADDR, au8DataContent); 
-#endif /* MPG1 */    
-
-        /* Update our local message counter and send the message back */
-
-        /* Check for a special packet and respond */
-#ifdef MPG1
-        if(G_au8AntApiCurrentMessageBytes[0] == 0xA5)
-        {
-          LedOff(LCD_RED);
-          LedOff(LCD_GREEN);
-          LedOff(LCD_BLUE);
-          
-          if(G_au8AntApiCurrentMessageBytes[1] == 1)
-          {
-            LedOn(LCD_RED);
-          }
-          
-          if(G_au8AntApiCurrentMessageBytes[2] == 1)
-          {
-            LedOn(LCD_GREEN);
-          }
-
-          if(G_au8AntApiCurrentMessageBytes[3] == 1)
-          {
-            LedOn(LCD_BLUE);
-          }
-        }
-#endif /* MPG1 */    
-
-      } /* end if(bGotNewData) */
+      } 
            
     }/* end if(G_eAntApiCurrentMessageClass == ANT_DATA) */
     
@@ -665,60 +623,8 @@ static void UserApp1SM_hide(void)
         au8TestMessage[5]++;
        }
       }
-      
+      LCDMessage(LINE2_START_ADDR, au8TestMessage);
       AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP_SEEK, au8TestMessage);
-      
-      UserApp1_u32TickMsgCount++;
-
-      /* Look at the TICK contents to check the event code and respond only if it's different */
-      if(u8LastState != G_au8AntApiCurrentMessageBytes[ANT_TICK_MSG_EVENT_CODE_INDEX])
-      {
-        /* The state changed so update u8LastState and queue a debug message */
-        u8LastState = G_au8AntApiCurrentMessageBytes[ANT_TICK_MSG_EVENT_CODE_INDEX];
-        au8TickMessage[6] = HexToASCIICharUpper(u8LastState);
-        DebugPrintf(au8TickMessage);
-
-        /* Parse u8LastState to update LED status */
-        switch (u8LastState)
-        {
-#ifdef MPG1
-          /* If we are paired but missing messages, blue blinks */
-          case EVENT_RX_FAIL:
-          {
-            LedOff(GREEN);
-            LedBlink(BLUE, LED_2HZ);
-            break;
-          }
-
-          /* If we drop to search, LED is green */
-          case EVENT_RX_FAIL_GO_TO_SEARCH:
-          {
-            LedOff(BLUE);
-            LedOn(GREEN);
-            break;
-          }
-#endif /* MPG 1 */
-
-          /* If the search times out, the channel should automatically close */
-          case EVENT_RX_SEARCH_TIMEOUT:
-          {
-            DebugPrintf("Search timeout event\r\n");
-            break;
-          }
-
-          case EVENT_CHANNEL_CLOSED:
-          {
-            DebugPrintf("Channel closed event\r\n");
-            break;
-          }
-
-            default:
-          {
-            DebugPrintf("Unexpected Event\r\n");
-            break;
-          }
-        } /* end switch (G_au8AntApiCurrentMessageBytes) */
-      } /* end if (u8LastState != G_au8AntApiCurrentMessageBytes[ANT_TICK_MSG_EVENT_CODE_INDEX]) */
     } /* end else if(G_eAntApiCurrentMessageClass == ANT_TICK) */
     
   } /* end AntReadAppMessageBuffer() */
@@ -731,8 +637,6 @@ static void UserApp1SM_hide(void)
     LedOff(BLUE);
 #endif /* MPG1 */
 
-    u8LastState = 0xff;
-    
     UserApp1_u32Timeout = G_u32SystemTime1ms;
     UserApp1_StateMachine = UserApp1SM_WaitChannelClose;
   } /* if(AntRadioStatusChannel(ANT_CHANNEL_USERAPP) != ANT_OPEN) */
@@ -744,7 +648,6 @@ static void UserApp1SM_hide(void)
     /* Queue close channel and change LED to blinking green to indicate channel is closing */
     AntCloseChannelNumber(ANT_CHANNEL_USERAPP_SEEK);
     AntCloseChannelNumber(ANT_CHANNEL_USERAPP_HIDE);
-    u8LastState = 0xff;
 
 #ifdef MPG1
     LedOff(YELLOW);
