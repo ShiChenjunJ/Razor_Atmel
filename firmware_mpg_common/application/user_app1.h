@@ -23,7 +23,7 @@ Header file for yournewtaskname.c
 /**********************************************************************************************************************
 Type Definitions
 **********************************************************************************************************************/
-
+typedef enum {RssiLevel=0,rssi1,rssi2,rssi3} RssiType;
 
 /**********************************************************************************************************************
 Constants / Definitions
@@ -78,10 +78,11 @@ static void UserApp1SM_CheckChannel1Assign(void);
 
 static void UserApp1SM_Idle(void);    
 static void UserApp1SM_WaitChannelOpen(void);
-
+static void UserApp1SM_Readytostart(void);
 static void UserApp1SM_Gamestart(void);
 static void UserApp1SM_wait10s(void);
 static void UserApp1SM_seek(void);
+static void UserApp1SM_Foundhider(void);
 static void UserApp1SM_hide(void);
 static void UserApp1SM_WaitChannelClose(void);
 

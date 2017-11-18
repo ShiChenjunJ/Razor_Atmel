@@ -9,7 +9,7 @@ TriggerName=main
 LimitSize=0
 ByteLimit=50
 [DebugChecksum]
-Checksum=-1834448736
+Checksum=596715849
 [JLinkDriver]
 CStepIntDis=_ 0
 WatchCond=_ 0
@@ -45,6 +45,17 @@ ActionState=1
 Enabled=_ 0
 [struct_types]
 Fmt0=AntExtendedDataType-u8Channel	3	0
+[array_types]
+Fmt0=u8[8]	4	0
+[watch_formats]
+Fmt0={W}1:0-G_sAntApiCurrentMessageExtData.s8RSSI	1	0
+Fmt1={W}1:G_sAntApiCurrentMessageExtData.s8RSSI	3	0
+Fmt2={W}1:au8TestMessage[4]	4	0
+Fmt3={W}1:au8TestMessage_seek[4]	4	0
+Fmt4={W}1:s8Rssi	3	0
+Fmt5={W}1:u8LastState	4	0
+Fmt6={W}1:u8Rssi	3	0
+Fmt7={W}1:u8rssi	3	0
 [Log file]
 LoggingEnabled=_ 0
 LogFile=_ ""
