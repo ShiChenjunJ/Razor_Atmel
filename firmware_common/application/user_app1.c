@@ -136,6 +136,18 @@ State Machine Function Definitions
 /* Wait for ??? */
 static void UserApp1SM_Idle(void)
 {
+  if((AT91C_BASE_PIOA->PIO_PDSR&0x00008000)==0x00000000)
+  {
+    PWMAudioSetFrequency(BUZZER1, 500);
+    PWMAudioOn(BUZZER1);
+    AT91C_BASE_PIOA->PIO_CODR=0x00000000;
+    AT91C_BASE_PIOB->PIO_CODR=0x00000000;  
+  }
+  else
+  {
+    AT91C_BASE_PIOA->PIO_SODR=0x00000800;
+    AT91C_BASE_PIOB->PIO_SODR=0x00000004;    
+  }
 
 } /* end UserApp1SM_Idle() */
     
