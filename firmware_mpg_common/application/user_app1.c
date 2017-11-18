@@ -289,6 +289,8 @@ static void UserApp1SM_Idle(void)
 /* Ready*/    
 static void UserApp1SM_Readytostart(void)
 {
+  LedOff(WHITE);
+  LedOff(PURPLE);
   if(WasButtonPressed(BUTTON0))
   {
     ButtonAcknowledge(BUTTON0);
@@ -382,12 +384,13 @@ static void UserApp1SM_seek(void)
   static u8 au8TestMessage_seek[] = {0, 0, 0, 0, 0xA5, 0, 0, 0};
   bool bGotNewData;
 
-  
+  static bool bBUZZER1=FALSE;
   static u8 u8rssi=95;
   static u8 u8Lastrssi=95;
   u8Lastrssi=0-G_sAntApiCurrentMessageExtData.s8RSSI;
   
   static RssiType RssiLevel=rssi0;
+  static RssiType LastRssiLevel=rssi0;
  /*Check for BUTTON0 to close channel */
   if(WasButtonPressed(BUTTON0))
   {
@@ -548,6 +551,7 @@ static void UserApp1SM_seek(void)
   {
     u8Lastrssi=0-G_sAntApiCurrentMessageExtData.s8RSSI;
     u8rssi=0-G_sAntApiCurrentMessageExtData.s8RSSI;
+    LastRssiLevel=RssiLevel;
     if((u8rssi<85)&&(u8rssi>30))
     {
       RssiLevel=rssi1;
@@ -560,20 +564,70 @@ static void UserApp1SM_seek(void)
         }
       }
     }
+     
+  }/*End Read Rssi*/
+  
+  if(RssiLevel!=u8Lastrssi)
+  {
+    switch(RssiLevel)
+    {
+    case rssi0:
+      {
+      LedOn(PURPLE);
+      LedOff(WHITE);
+      PWMAudioOn(BUZZER1);
+      break;
+      }
+    
+    case rssi1:
+      {
+      LedOn(WHITE);
+      LedOff(PURPLE);
+      PWMAudioOn(BUZZER1);
+      PWMAudioSetFrequency(BUZZER1,300);
+      break;
+      } 
+    
+    case rssi2:
+      {
+      LedOn(WHITE);
+      LedOn(PURPLE);
+      PWMAudioOn(BUZZER1);
+      PWMAudioSetFrequency(BUZZER1,600);
+      break;
+      } 
+    case rssi3:
+      {
+      PWMAudioOff(BUZZER1);
+      LedBlink(WHITE,LED_1HZ);
+      LedBlink(PURPLE,LED_1HZ);
+      LCDCommand(LCD_CLEAR_CMD);
+      LCDMessage(LINE1_START_ADDR, "  FOUND YOU!  ");
+      au8TestMessage_seek[0]=0x10;
+      AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP_SEEK, au8TestMessage_seek);
+      au8TestMessage_seek[0]=0x00;
+      u8LastState = 0xff;
+      u32WaitTime = G_u32SystemTime1ms;
+      UserApp1_StateMachine = UserApp1SM_Foundhider;
+      break;
+      } 
+    }
+  }/*End */
+    if(WasButtonPressed(BUTTON3))
+  {
+    ButtonAcknowledge(BUTTON3);
+    bBUZZER1=!bBUZZER1;
+    if(bBUZZER1)
+    {
+     PWMAudioOff(BUZZER1);
+    }
+    else
+    {
+     PWMAudioOn(BUZZER1);
+    }
+    
   }
   
-  switch(RssiLevel)
-  {
-    case RssiLevel
-   LCDCommand(LCD_CLEAR_CMD);
-   LCDMessage(LINE1_START_ADDR, "  FOUND YOU!  ");
-   au8TestMessage_seek[0]=0x10;
-   AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP_SEEK, au8TestMessage_seek);
-   au8TestMessage_seek[0]=0x00;
-   u8LastState = 0xff;
-   u32WaitTime = G_u32SystemTime1ms;
-   UserApp1_StateMachine = UserApp1SM_Foundhider; 
-  }
      
 } /* end UserApp1SM_ChannelOpen() */
 /*-------------------------------------------------------------------------------------------------------------------*/
