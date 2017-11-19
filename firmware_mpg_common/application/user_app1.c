@@ -73,10 +73,12 @@ static AntAssignChannelInfoType sAntSetupData_hide;
 static AntChannelNumberType ANT_CHANNEL_USERAPP;
 static u32 u32WaitTime;
 
-static u8 u8rssi=95;
-static u8 u8Lastrssi=95;
+static u8 u8rssi=99;
+static u8 u8Lastrssi=99;
 static RssiType RssiLevel=rssi0;
 static RssiType LastRssiLevel=rssi0;
+
+static u8 au8TestMessage_hide[] = {0x13, 0x19, 0, 0, 0xA5, 0, 0, 0};
 /**********************************************************************************************************************
 Function Definitions
 **********************************************************************************************************************/
@@ -297,18 +299,22 @@ static void UserApp1SM_Readytostart(void)
   LedOff(WHITE);
   LedOff(PURPLE);
   LedOff(ORANGE);
+  
   if(WasButtonPressed(BUTTON0))
   {
     ButtonAcknowledge(BUTTON0);
+    
     LCDCommand(LCD_CLEAR_CMD);
     if( ANT_CHANNEL_USERAPP == ANT_CHANNEL_USERAPP_SEEK)
     {
+      
       LCDMessage(LINE1_START_ADDR, "SEEKER");
       LedBlink(CYAN,LED_1HZ);   
     }
   
     if( ANT_CHANNEL_USERAPP == ANT_CHANNEL_USERAPP_HIDE)
     {
+      
       LCDMessage(LINE1_START_ADDR, "HIDER");
     }
 
@@ -384,7 +390,7 @@ static void UserApp1SM_seek(void)
 {
   static u8 u8LastState = 0xff;
   static u8 au8TickMessage[] = "EVENT x\n\r";  /* "x" at index [6] will be replaced by the current code */
-  static u8 au8DataContent[] = "xxxxxxxxxxxxxxxx";
+  static u8 au8DataContent_seek[] = "xxxxxxxxxxxxxxxx";
   static u8 au8LastAntData[ANT_APPLICATION_MESSAGE_BYTES] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
   static u8 au8TestMessage_seek[] = {0, 0, 0, 0, 0xA5, 0, 0, 0};
   static u8 au8LCDRssi[]="-99dB";
@@ -437,19 +443,23 @@ static void UserApp1SM_seek(void)
         {
           bGotNewData = TRUE;
           au8LastAntData[i] = G_au8AntApiCurrentMessageBytes[i];
-          au8DataContent[2 * i]     = HexToASCIICharUpper(G_au8AntApiCurrentMessageBytes[i] / 16);
-          au8DataContent[2 * i + 1] = HexToASCIICharUpper(G_au8AntApiCurrentMessageBytes[i] % 16); 
+          au8DataContent_seek[2 * i]     = HexToASCIICharUpper(G_au8AntApiCurrentMessageBytes[i] / 16);
+          au8DataContent_seek[2 * i + 1] = HexToASCIICharUpper(G_au8AntApiCurrentMessageBytes[i] % 16); 
         }
+        
+        if((au8DataContent_seek[0]=='1')&&
+          (au8DataContent_seek[1]=='3')&&
+          (au8DataContent_seek[2]=='1')&&
+          (au8DataContent_seek[3]=='9'))
+          {
+            bFound=TRUE;
+          }
       }
    
       if(bGotNewData)
       {
         /* We got new data: show on LCD */
-if(0)
-{
-  LCDCommand(LCD_CLEAR_CMD);
-  LCDMessage(LINE2_START_ADDR, au8DataContent); 
-}
+
       /* Update our local message counter and send the message back */
 
         /* Check for a special packet and respond */
@@ -551,13 +561,7 @@ if(0)
     UserApp1_StateMachine = UserApp1SM_WaitChannelClose;
   } /* if(AntRadioStatusChannel(ANT_CHANNEL_USERAPP) != ANT_OPEN) */
   
-if((au8DataContent[0]=='1')&&
-   (au8DataContent[1]=='3')&&
-   (au8DataContent[2]=='1')&&
-   (au8DataContent[3]=='9'))
-{
-  bFound=TRUE;
-}
+
 
 if(G_sAntApiCurrentMessageExtData.u8Channel==ANT_CHANNEL_0)
 {
@@ -571,10 +575,10 @@ if(G_sAntApiCurrentMessageExtData.u8Channel==ANT_CHANNEL_0)
     LCDMessage(0x4D, au8LCDRssi);
     LastRssiLevel=RssiLevel;
     
-    if((u8rssi<95)&&(u8rssi>30))
+    if((u8rssi<80)&&(u8rssi>30))
     {
       RssiLevel=rssi1;
-      if(u8rssi<65)
+      if(u8rssi<60)
       {
         RssiLevel=rssi2;
         if(u8rssi<45)
@@ -626,14 +630,24 @@ if(G_sAntApiCurrentMessageExtData.u8Channel==ANT_CHANNEL_0)
         {       
           LedBlink(ORANGE,LED_1HZ);
           LedBlink(PURPLE,LED_1HZ);
-          LedBlink(WHITE,LED_1HZ);         
+          LedBlink(WHITE,LED_1HZ);  
+          
           LCDCommand(LCD_CLEAR_CMD);
           LCDMessage(LINE1_START_ADDR, "  FOUND YOU!  ");
+          
           au8TestMessage_seek[0]=0x10;
           AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP_SEEK, au8TestMessage_seek);
           au8TestMessage_seek[0]=0x00;
+          
           u8LastState = 0xff;
+          
           bFound=FALSE;
+          
+          au8DataContent_seek[0]='0';
+          au8DataContent_seek[1]='0';
+          au8DataContent_seek[2]='0';
+          au8DataContent_seek[3]='0';
+          
           u32WaitTime = G_u32SystemTime1ms;
           UserApp1_StateMachine = UserApp1SM_Foundhider;         
         }
@@ -664,6 +678,8 @@ else
    PWMAudioOff(BUZZER1);
   }
 
+  
+
 
      
 } /* end UserApp1SM_ChannelOpen() */
@@ -672,8 +688,8 @@ else
 static void UserApp1SM_Foundhider(void)
 {
   PWMAudioOff(BUZZER1);
-  u8rssi=95;
-  u8Lastrssi=95;
+  u8rssi=99;
+  u8Lastrssi=99;
   RssiLevel=rssi0;
   LastRssiLevel=rssi0;
 
@@ -682,19 +698,28 @@ static void UserApp1SM_Foundhider(void)
   { 
     LCDCommand(LCD_CLEAR_CMD);
     LCDMessage(LINE1_START_ADDR, "PRESS B0 TO START"); 
+    
     AntCloseChannelNumber(ANT_CHANNEL_USERAPP_SEEK);
     AntCloseChannelNumber(ANT_CHANNEL_USERAPP_HIDE);
   switch(ANT_CHANNEL_USERAPP)
   {
   case ANT_CHANNEL_USERAPP_SEEK:
     {
-    ANT_CHANNEL_USERAPP=ANT_CHANNEL_USERAPP_HIDE;
+    ANT_CHANNEL_USERAPP = ANT_CHANNEL_USERAPP_HIDE;
+    au8TestMessage_hide[0] = '1';
+    au8TestMessage_hide[1] = '3';
+    au8TestMessage_hide[2] = '1';
+    au8TestMessage_hide[3] = '9';
     break;
     }
     
   case ANT_CHANNEL_USERAPP_HIDE:
     {
-    ANT_CHANNEL_USERAPP=ANT_CHANNEL_USERAPP_SEEK;
+    ANT_CHANNEL_USERAPP = ANT_CHANNEL_USERAPP_SEEK;
+    au8TestMessage_hide[0] = '0';
+    au8TestMessage_hide[1] = '0';
+    au8TestMessage_hide[2] = '0';
+    au8TestMessage_hide[3] = '0';    
     break;
     }
     
@@ -785,7 +810,7 @@ static void UserApp1SM_hide(void)
           }
          }
         LedOff(BLUE);
-        AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP_HIDE, au8TestMessage);
+        AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP_HIDE, au8TestMessage_hide);
 
     } /* end else if(G_eAntApiCurrentMessageClass == ANT_TICK) */
     
