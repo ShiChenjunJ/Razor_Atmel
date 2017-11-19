@@ -126,8 +126,8 @@ void UserApp1Initialize(void)
   /* Hide Channel0 */
   sAntSetupData_seek.AntChannel          = ANT_CHANNEL_USERAPP_SEEK;
   sAntSetupData_seek.AntChannelType      = CHANNEL_TYPE_SLAVE;
-  sAntSetupData_seek.AntChannelPeriodLo  = ANT_CHANNEL_PERIOD_LO_USERAPP;
-  sAntSetupData_seek.AntChannelPeriodHi  = ANT_CHANNEL_PERIOD_HI_USERAPP;
+  sAntSetupData_seek.AntChannelPeriodLo  = 0;
+  sAntSetupData_seek.AntChannelPeriodHi  = 0;
   
   sAntSetupData_seek.AntDeviceIdLo       = ANT_DEVICEID_LO_USERAPP;
   sAntSetupData_seek.AntDeviceIdHi       = ANT_DEVICEID_HI_USERAPP;
@@ -296,6 +296,7 @@ static void UserApp1SM_Readytostart(void)
 {
   LedOff(WHITE);
   LedOff(PURPLE);
+  LedOff(ORANGE);
   if(WasButtonPressed(BUTTON0))
   {
     ButtonAcknowledge(BUTTON0);
@@ -389,9 +390,9 @@ static void UserApp1SM_seek(void)
   bool bGotNewData;
 
   static bool bBUZZER1=TRUE;
-
+  static bool bFound=FALSE;
   u8Lastrssi=0-G_sAntApiCurrentMessageExtData.s8RSSI;
-  G_sAntApiCurrentMessageExtData.s8RSSI=-99;
+  
 
  /*Check for BUTTON0 to close channel */
   if(WasButtonPressed(BUTTON0))
@@ -550,13 +551,21 @@ if(0)
     UserApp1_StateMachine = UserApp1SM_WaitChannelClose;
   } /* if(AntRadioStatusChannel(ANT_CHANNEL_USERAPP) != ANT_OPEN) */
   
+if((au8DataContent[0]=='1')&&
+   (au8DataContent[1]=='3')&&
+   (au8DataContent[2]=='1')&&
+   (au8DataContent[3]=='9'))
+{
+  bFound=TRUE;
+}
+
   if(u8Lastrssi!=(0-G_sAntApiCurrentMessageExtData.s8RSSI))
   {
     u8Lastrssi=0-G_sAntApiCurrentMessageExtData.s8RSSI;
     u8rssi=0-G_sAntApiCurrentMessageExtData.s8RSSI;
     LastRssiLevel=RssiLevel;
     
-    if((u8rssi<85)&&(u8rssi>30))
+    if((u8rssi<75)&&(u8rssi>30))
     {
       RssiLevel=rssi1;
       if(u8rssi<65)
@@ -604,24 +613,27 @@ if(0)
       }
     case rssi3:
       {
-      
-      LedBlink(WHITE,LED_1HZ);
-      LedBlink(PURPLE,LED_1HZ);
-      LCDCommand(LCD_CLEAR_CMD);
-      LCDMessage(LINE1_START_ADDR, "  FOUND YOU!  ");
-      au8TestMessage_seek[0]=0x10;
-      AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP_SEEK, au8TestMessage_seek);
-      au8TestMessage_seek[0]=0x00;
-      u8LastState = 0xff;
-      
-      u32WaitTime = G_u32SystemTime1ms;
-      UserApp1_StateMachine = UserApp1SM_Foundhider;
-      
+       if(bFound)
+        {
+          LedBlink(WHITE,LED_1HZ);
+          LedBlink(PURPLE,LED_1HZ);
+          LCDCommand(LCD_CLEAR_CMD);
+          LCDMessage(LINE1_START_ADDR, "  FOUND YOU!  ");
+          au8TestMessage_seek[0]=0x10;
+          AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP_SEEK, au8TestMessage_seek);
+          au8TestMessage_seek[0]=0x00;
+          u8LastState = 0xff;
+          bFound=FALSE;
+          u32WaitTime = G_u32SystemTime1ms;
+          UserApp1_StateMachine = UserApp1SM_Foundhider;         
+        }
 
       break;
       } 
     }
   }/*End */
+ 
+ 
 if(WasButtonPressed(BUTTON3))
   {
    ButtonAcknowledge(BUTTON3);
@@ -637,7 +649,7 @@ else
    PWMAudioOff(BUZZER1);
   }
 
-  
+
      
 } /* end UserApp1SM_ChannelOpen() */
 /*-------------------------------------------------------------------------------------------------------------------*/
@@ -695,7 +707,7 @@ static void UserApp1SM_hide(void)
 
   static u8 au8DataContent_hide[] = "xxxxxxxxxxxxxxxx";
   static u8 au8LastAntData[ANT_APPLICATION_MESSAGE_BYTES] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-  static u8 au8TestMessage[] = {0, 0, 0, 0, 0xA5, 0, 0, 0};
+  static u8 au8TestMessage[] = {0x13, 0x19, 0x00, 0x00, 0xA5, 0, 0, 0};
 
 
   /* Check for BUTTON0 to close channel */
