@@ -387,13 +387,13 @@ static void UserApp1SM_seek(void)
   static u8 au8DataContent[] = "xxxxxxxxxxxxxxxx";
   static u8 au8LastAntData[ANT_APPLICATION_MESSAGE_BYTES] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
   static u8 au8TestMessage_seek[] = {0, 0, 0, 0, 0xA5, 0, 0, 0};
+  static u8 au8LCDRssi[]="-99dB";
   bool bGotNewData;
 
   static bool bBUZZER1=TRUE;
   static bool bFound=FALSE;
-  u8Lastrssi=0-G_sAntApiCurrentMessageExtData.s8RSSI;
-  
 
+  u8Lastrssi=0-G_sAntApiCurrentMessageExtData.s8RSSI;
  /*Check for BUTTON0 to close channel */
   if(WasButtonPressed(BUTTON0))
   {
@@ -559,10 +559,16 @@ if((au8DataContent[0]=='1')&&
   bFound=TRUE;
 }
 
+if(G_sAntApiCurrentMessageExtData.u8Channel==ANT_CHANNEL_0)
+{
   if(u8Lastrssi!=(0-G_sAntApiCurrentMessageExtData.s8RSSI))
   {
     u8Lastrssi=0-G_sAntApiCurrentMessageExtData.s8RSSI;
     u8rssi=0-G_sAntApiCurrentMessageExtData.s8RSSI;
+    au8LCDRssi[1]=(u8rssi/10)+'0';
+    au8LCDRssi[2]=(u8rssi%10)+'0';
+    LCDClearChars(0x4D,5);
+    LCDMessage(0x4D, au8LCDRssi);
     LastRssiLevel=RssiLevel;
     
     if((u8rssi<95)&&(u8rssi>30))
@@ -583,27 +589,33 @@ if((au8DataContent[0]=='1')&&
     }
      
   }/*End Read Rssi*/
-  
+} 
   if(RssiLevel!=LastRssiLevel)
   {
     switch(RssiLevel)
     {
     case rssi0:
       {
-      LedOn(ORANGE);  
+      LedOn(ORANGE);
+      LedOff(PURPLE);
+      LedOff(WHITE);     
       PWMAudioSetFrequency(BUZZER1,300);
       break;
       }
     
     case rssi1:
       {
+      LedOn(ORANGE);
       LedOn(PURPLE);
+      LedOff(WHITE);
       PWMAudioSetFrequency(BUZZER1,600);
       break;
       } 
     
     case rssi2:
       {
+      LedOn(ORANGE);
+      LedOn(PURPLE);
       LedOn(WHITE);
       PWMAudioSetFrequency(BUZZER1,1000);
       break;
@@ -611,9 +623,10 @@ if((au8DataContent[0]=='1')&&
     case rssi3:
       {
        if(bFound)
-        {
-          LedBlink(WHITE,LED_1HZ);
+        {       
+          LedBlink(ORANGE,LED_1HZ);
           LedBlink(PURPLE,LED_1HZ);
+          LedBlink(WHITE,LED_1HZ);         
           LCDCommand(LCD_CLEAR_CMD);
           LCDMessage(LINE1_START_ADDR, "  FOUND YOU!  ");
           au8TestMessage_seek[0]=0x10;
