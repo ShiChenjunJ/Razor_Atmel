@@ -384,7 +384,7 @@ static void UserApp1SM_seek(void)
   static u8 au8TestMessage_seek[] = {0, 0, 0, 0, 0xA5, 0, 0, 0};
   bool bGotNewData;
 
-  static bool bBUZZER1=FALSE;
+  static bool bBUZZER1=TRUE;
   static u8 u8rssi=95;
   static u8 u8Lastrssi=95;
   u8Lastrssi=0-G_sAntApiCurrentMessageExtData.s8RSSI;
@@ -575,7 +575,7 @@ static void UserApp1SM_seek(void)
       {
       LedOn(PURPLE);
       LedOff(WHITE);
-      PWMAudioOn(BUZZER1);
+      
       break;
       }
     
@@ -583,7 +583,7 @@ static void UserApp1SM_seek(void)
       {
       LedOn(WHITE);
       LedOff(PURPLE);
-      PWMAudioOn(BUZZER1);
+      
       PWMAudioSetFrequency(BUZZER1,300);
       break;
       } 
@@ -592,10 +592,10 @@ static void UserApp1SM_seek(void)
       {
       LedOn(WHITE);
       LedOn(PURPLE);
-      PWMAudioOn(BUZZER1);
+      
       PWMAudioSetFrequency(BUZZER1,600);
       break;
-      } 
+      }
     case rssi3:
       {
       PWMAudioOff(BUZZER1);
@@ -613,20 +613,21 @@ static void UserApp1SM_seek(void)
       } 
     }
   }/*End */
-    if(WasButtonPressed(BUTTON3))
+if(WasButtonPressed(BUTTON3))
   {
-    ButtonAcknowledge(BUTTON3);
-    bBUZZER1=!bBUZZER1;
-    if(bBUZZER1)
-    {
-     PWMAudioOff(BUZZER1);
-    }
-    else
-    {
-     PWMAudioOn(BUZZER1);
-    }
-    
+   ButtonAcknowledge(BUTTON3);
+   bBUZZER1=!bBUZZER1;  
   }
+  
+if(bBUZZER1)
+  {
+   PWMAudioOn(BUZZER1);
+   }
+else
+  {
+   PWMAudioOff(BUZZER1);
+  }
+
   
      
 } /* end UserApp1SM_ChannelOpen() */
