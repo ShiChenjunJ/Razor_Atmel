@@ -399,6 +399,8 @@ static void UserApp1SM_seek(void)
   static bool bBUZZER1=TRUE;
   static bool bFound=FALSE;
 
+
+    
   u8Lastrssi=0-G_sAntApiCurrentMessageExtData.s8RSSI;
  /*Check for BUTTON0 to close channel */
   if(WasButtonPressed(BUTTON0))
@@ -425,6 +427,8 @@ static void UserApp1SM_seek(void)
 
   /* Always check for ANT messages */
   if( AntReadAppMessageBuffer() )
+  {
+      if(G_sAntApiCurrentMessageExtData.u8Channel==ANT_CHANNEL_0)
   {
      /* New data message: check what it is */
     if(G_eAntApiCurrentMessageClass == ANT_DATA)
@@ -544,7 +548,7 @@ static void UserApp1SM_seek(void)
         } /* end switch (G_au8AntApiCurrentMessageBytes) */
       } /* end if (u8LastState != G_au8AntApiCurrentMessageBytes[ANT_TICK_MSG_EVENT_CODE_INDEX]) */
     } /* end else if(G_eAntApiCurrentMessageClass == ANT_TICK) */
-    
+  }
   } /* end AntReadAppMessageBuffer() */
   
   /* A slave channel can close on its own, so explicitly check channel status */
@@ -680,7 +684,7 @@ else
 
   
 
-
+  
      
 } /* end UserApp1SM_ChannelOpen() */
 /*-------------------------------------------------------------------------------------------------------------------*/
@@ -706,10 +710,7 @@ static void UserApp1SM_Foundhider(void)
   case ANT_CHANNEL_USERAPP_SEEK:
     {
     ANT_CHANNEL_USERAPP = ANT_CHANNEL_USERAPP_HIDE;
-    au8TestMessage_hide[0] = '1';
-    au8TestMessage_hide[1] = '3';
-    au8TestMessage_hide[2] = '1';
-    au8TestMessage_hide[3] = '9';
+
     break;
     }
     
@@ -717,9 +718,7 @@ static void UserApp1SM_Foundhider(void)
     {
     ANT_CHANNEL_USERAPP = ANT_CHANNEL_USERAPP_SEEK;
     au8TestMessage_hide[0] = '0';
-    au8TestMessage_hide[1] = '0';
-    au8TestMessage_hide[2] = '0';
-    au8TestMessage_hide[3] = '0';    
+
     break;
     }
     
@@ -771,9 +770,11 @@ static void UserApp1SM_hide(void)
     UserApp1_StateMachine = UserApp1SM_WaitChannelClose;
   } /* end if(WasButtonPressed(BUTTON0)) */
   
+ 
   /* Always check for ANT messages */
   if( AntReadAppMessageBuffer() )
-  {
+  { if(G_sAntApiCurrentMessageExtData.u8Channel==ANT_CHANNEL_1)
+{
      /* New data message: check what it is */
     if(G_eAntApiCurrentMessageClass == ANT_DATA)
     { 
@@ -813,7 +814,7 @@ static void UserApp1SM_hide(void)
         AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP_HIDE, au8TestMessage_hide);
 
     } /* end else if(G_eAntApiCurrentMessageClass == ANT_TICK) */
-    
+  }
   } /* end AntReadAppMessageBuffer() */
   
   if(au8DataContent_hide[0]=='1')
@@ -825,7 +826,8 @@ static void UserApp1SM_hide(void)
     u32WaitTime = G_u32SystemTime1ms;
     UserApp1_StateMachine = UserApp1SM_Foundhider;
   }
-      
+
+
 } /* end UserApp1SM_ChannelOpen() */
 
 
