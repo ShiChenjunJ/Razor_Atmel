@@ -72,6 +72,11 @@ static AntAssignChannelInfoType sAntSetupData_seek;
 static AntAssignChannelInfoType sAntSetupData_hide;
 static AntChannelNumberType ANT_CHANNEL_USERAPP;
 static u32 u32WaitTime;
+
+static u8 u8rssi=95;
+static u8 u8Lastrssi=95;
+static RssiType RssiLevel=rssi0;
+static RssiType LastRssiLevel=rssi0;
 /**********************************************************************************************************************
 Function Definitions
 **********************************************************************************************************************/
@@ -325,7 +330,6 @@ static void UserApp1SM_wait10s(void)
       LedOff(CYAN);
     }
     
-    
     AntOpenChannelNumber(ANT_CHANNEL_USERAPP_SEEK); 
     AntOpenChannelNumber(ANT_CHANNEL_USERAPP_HIDE);
     
@@ -385,12 +389,10 @@ static void UserApp1SM_seek(void)
   bool bGotNewData;
 
   static bool bBUZZER1=TRUE;
-  static u8 u8rssi=95;
-  static u8 u8Lastrssi=95;
+
   u8Lastrssi=0-G_sAntApiCurrentMessageExtData.s8RSSI;
-  
-  static RssiType RssiLevel=rssi0;
-  static RssiType LastRssiLevel=rssi0;
+  G_sAntApiCurrentMessageExtData.s8RSSI=-99;
+
  /*Check for BUTTON0 to close channel */
   if(WasButtonPressed(BUTTON0))
   {
@@ -442,10 +444,11 @@ static void UserApp1SM_seek(void)
       if(bGotNewData)
       {
         /* We got new data: show on LCD */
-#ifdef MPG1
-        LCDCommand(LCD_CLEAR_CMD);
-        LCDMessage(LINE2_START_ADDR, au8DataContent); 
-#endif /* MPG1 */    
+if(0)
+{
+  LCDCommand(LCD_CLEAR_CMD);
+  LCDMessage(LINE2_START_ADDR, au8DataContent); 
+}
       /* Update our local message counter and send the message back */
 
         /* Check for a special packet and respond */
@@ -552,6 +555,7 @@ static void UserApp1SM_seek(void)
     u8Lastrssi=0-G_sAntApiCurrentMessageExtData.s8RSSI;
     u8rssi=0-G_sAntApiCurrentMessageExtData.s8RSSI;
     LastRssiLevel=RssiLevel;
+    
     if((u8rssi<85)&&(u8rssi>30))
     {
       RssiLevel=rssi1;
@@ -564,10 +568,14 @@ static void UserApp1SM_seek(void)
         }
       }
     }
+    else
+    {
+      RssiLevel=rssi0;
+    }
      
   }/*End Read Rssi*/
   
-  if(RssiLevel!=u8Lastrssi)
+  if(RssiLevel!=LastRssiLevel)
   {
     switch(RssiLevel)
     {
@@ -575,7 +583,7 @@ static void UserApp1SM_seek(void)
       {
       LedOn(PURPLE);
       LedOff(WHITE);
-      
+      PWMAudioSetFrequency(BUZZER1,300);
       break;
       }
     
@@ -583,8 +591,7 @@ static void UserApp1SM_seek(void)
       {
       LedOn(WHITE);
       LedOff(PURPLE);
-      
-      PWMAudioSetFrequency(BUZZER1,300);
+      PWMAudioSetFrequency(BUZZER1,600);
       break;
       } 
     
@@ -592,13 +599,12 @@ static void UserApp1SM_seek(void)
       {
       LedOn(WHITE);
       LedOn(PURPLE);
-      
-      PWMAudioSetFrequency(BUZZER1,600);
+      PWMAudioSetFrequency(BUZZER1,1000);
       break;
       }
     case rssi3:
       {
-      PWMAudioOff(BUZZER1);
+      
       LedBlink(WHITE,LED_1HZ);
       LedBlink(PURPLE,LED_1HZ);
       LCDCommand(LCD_CLEAR_CMD);
@@ -607,8 +613,11 @@ static void UserApp1SM_seek(void)
       AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP_SEEK, au8TestMessage_seek);
       au8TestMessage_seek[0]=0x00;
       u8LastState = 0xff;
+      
       u32WaitTime = G_u32SystemTime1ms;
       UserApp1_StateMachine = UserApp1SM_Foundhider;
+      
+
       break;
       } 
     }
@@ -635,14 +644,19 @@ else
 /* seek found*/
 static void UserApp1SM_Foundhider(void)
 {
+  PWMAudioOff(BUZZER1);
+  u8rssi=95;
+  u8Lastrssi=95;
+  RssiLevel=rssi0;
+  LastRssiLevel=rssi0;
+
+  
   if(IsTimeUp(&u32WaitTime, 5000))
   { 
     LCDCommand(LCD_CLEAR_CMD);
     LCDMessage(LINE1_START_ADDR, "PRESS B0 TO START"); 
-    /* Queue close channel and change LED to blinking green to indicate channel is closing */
     AntCloseChannelNumber(ANT_CHANNEL_USERAPP_SEEK);
     AntCloseChannelNumber(ANT_CHANNEL_USERAPP_HIDE);
-
   switch(ANT_CHANNEL_USERAPP)
   {
   case ANT_CHANNEL_USERAPP_SEEK:
@@ -775,7 +789,7 @@ static void UserApp1SM_WaitChannelClose(void)
     LedOff(GREEN);
     LedOn(YELLOW);
 #endif /* MPG1 */
-
+    G_sAntApiCurrentMessageExtData.s8RSSI=-99;
     UserApp1_StateMachine = UserApp1SM_Readytostart;
   }
   
