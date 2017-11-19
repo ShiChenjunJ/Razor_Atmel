@@ -565,7 +565,7 @@ if((au8DataContent[0]=='1')&&
     u8rssi=0-G_sAntApiCurrentMessageExtData.s8RSSI;
     LastRssiLevel=RssiLevel;
     
-    if((u8rssi<75)&&(u8rssi>30))
+    if((u8rssi<95)&&(u8rssi>30))
     {
       RssiLevel=rssi1;
       if(u8rssi<65)
@@ -590,7 +590,8 @@ if((au8DataContent[0]=='1')&&
     {
     case rssi0:
       {
-      LedOn(PURPLE);
+      LedOn(WHITE);  
+      LedOff(PURPLE);
       LedOff(WHITE);
       PWMAudioSetFrequency(BUZZER1,300);
       break;
@@ -599,6 +600,7 @@ if((au8DataContent[0]=='1')&&
     case rssi1:
       {
       LedOn(WHITE);
+      LedOn(WHITE);
       LedOff(PURPLE);
       PWMAudioSetFrequency(BUZZER1,600);
       break;
@@ -606,6 +608,7 @@ if((au8DataContent[0]=='1')&&
     
     case rssi2:
       {
+      LedOn(WHITE);
       LedOn(WHITE);
       LedOn(PURPLE);
       PWMAudioSetFrequency(BUZZER1,1000);
@@ -627,6 +630,11 @@ if((au8DataContent[0]=='1')&&
           u32WaitTime = G_u32SystemTime1ms;
           UserApp1_StateMachine = UserApp1SM_Foundhider;         
         }
+       else
+       {
+         LCDCommand(LCD_CLEAR_CMD);
+         LCDMessage(LINE1_START_ADDR, "  not this  ");
+       }
 
       break;
       } 
