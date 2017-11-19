@@ -590,18 +590,14 @@ if((au8DataContent[0]=='1')&&
     {
     case rssi0:
       {
-      LedOn(WHITE);  
-      LedOff(PURPLE);
-      LedOff(WHITE);
+      LedOn(ORANGE);  
       PWMAudioSetFrequency(BUZZER1,300);
       break;
       }
     
     case rssi1:
       {
-      LedOn(WHITE);
-      LedOn(WHITE);
-      LedOff(PURPLE);
+      LedOn(PURPLE);
       PWMAudioSetFrequency(BUZZER1,600);
       break;
       } 
@@ -609,8 +605,6 @@ if((au8DataContent[0]=='1')&&
     case rssi2:
       {
       LedOn(WHITE);
-      LedOn(WHITE);
-      LedOn(PURPLE);
       PWMAudioSetFrequency(BUZZER1,1000);
       break;
       }
