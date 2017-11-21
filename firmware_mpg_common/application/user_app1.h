@@ -80,7 +80,7 @@ static void UserApp1SM_Idle(void);
 static void UserApp1SM_WaitChannelOpen(void);
 static void UserApp1SM_Readytostart(void);
 static void UserApp1SM_Gamestart(void);
-static void UserApp1SM_wait10s(void);
+static void UserApp1SM_wait3s(void);
 static void UserApp1SM_seek(void);
 static void UserApp1SM_Foundhider(void);
 static void UserApp1SM_hide(void);

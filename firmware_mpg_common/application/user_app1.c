@@ -319,15 +319,15 @@ static void UserApp1SM_Readytostart(void)
     }
 
     u32WaitTime = G_u32SystemTime1ms;
-    UserApp1_StateMachine = UserApp1SM_wait10s; 
+    UserApp1_StateMachine = UserApp1SM_wait3s; 
   }
 }
 
 /*-------------------------------------------------------------------------------------------------------------------*/
 /* Channel is open, so monitor data */
-static void UserApp1SM_wait10s(void)
+static void UserApp1SM_wait3s(void)
 {
-  if( IsTimeUp(&u32WaitTime,10000) )
+  if( IsTimeUp(&u32WaitTime,3000) )
   {
     if( ANT_CHANNEL_USERAPP == ANT_CHANNEL_USERAPP_SEEK)
     {
@@ -698,7 +698,7 @@ static void UserApp1SM_Foundhider(void)
   LastRssiLevel=rssi0;
 
   
-  if(IsTimeUp(&u32WaitTime, 5000))
+  if(IsTimeUp(&u32WaitTime, 3000))
   { 
     LCDCommand(LCD_CLEAR_CMD);
     LCDMessage(LINE1_START_ADDR, "PRESS B0 TO START"); 
