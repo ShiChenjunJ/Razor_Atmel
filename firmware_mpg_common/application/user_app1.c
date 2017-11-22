@@ -78,7 +78,6 @@ static u8 u8Lastrssi=99;
 static RssiType RssiLevel=rssi0;
 static RssiType LastRssiLevel=rssi0;
 
-static u8 au8TestMessage_hide[] = {0x13, 0x19, 0, 0, 0xA5, 0, 0, 0};
 /**********************************************************************************************************************
 Function Definitions
 **********************************************************************************************************************/
@@ -111,7 +110,7 @@ void UserApp1Initialize(void)
   LCDMessage(LINE2_START_ADDR, "B1 SEEKER B2 HIDER");
   
  /* Configure ANT for this application */
-  /*Seek Channel1*/
+  /*Channel1*/
   sAntSetupData_hide.AntChannel          = ANT_CHANNEL_USERAPP_HIDE;
   sAntSetupData_hide.AntChannelType      = CHANNEL_TYPE_MASTER;
   sAntSetupData_hide.AntChannelPeriodLo  = ANT_CHANNEL_PERIOD_LO_USERAPP;
@@ -125,14 +124,14 @@ void UserApp1Initialize(void)
   sAntSetupData_hide.AntTxPower          = ANT_TX_POWER_USERAPP;
   
   sAntSetupData_hide.AntNetwork = ANT_NETWORK_DEFAULT;
-  /* Hide Channel0 */
+  /* Channel0 */
   sAntSetupData_seek.AntChannel          = ANT_CHANNEL_USERAPP_SEEK;
   sAntSetupData_seek.AntChannelType      = CHANNEL_TYPE_SLAVE;
-  sAntSetupData_seek.AntChannelPeriodLo  = 0;
-  sAntSetupData_seek.AntChannelPeriodHi  = 0;
+  sAntSetupData_seek.AntChannelPeriodLo  = ANT_CHANNEL_PERIOD_LO_USERAPP;
+  sAntSetupData_seek.AntChannelPeriodHi  = ANT_CHANNEL_PERIOD_HI_USERAPP;
   
-  sAntSetupData_seek.AntDeviceIdLo       = ANT_DEVICEID_LO_USERAPP;
-  sAntSetupData_seek.AntDeviceIdHi       = ANT_DEVICEID_HI_USERAPP;
+  sAntSetupData_seek.AntDeviceIdLo       = 0x00;
+  sAntSetupData_seek.AntDeviceIdHi       = 0x00;
   sAntSetupData_seek.AntDeviceType       = ANT_DEVICE_TYPE_USERAPP;
   sAntSetupData_seek.AntTransmissionType = ANT_TRANSMISSION_TYPE_USERAPP;
   sAntSetupData_seek.AntFrequency        = ANT_FREQUENCY_USERAPP;
@@ -272,7 +271,6 @@ static void UserApp1SM_CheckChannel1Assign(void)
 /* Wait for a message to be queued */
 static void UserApp1SM_Idle(void)
 {
-
   if(WasButtonPressed(BUTTON1))
   {
     ButtonAcknowledge(BUTTON1);
@@ -682,9 +680,6 @@ else
    PWMAudioOff(BUZZER1);
   }
 
-  
-
-  
      
 } /* end UserApp1SM_ChannelOpen() */
 /*-------------------------------------------------------------------------------------------------------------------*/
@@ -717,8 +712,6 @@ static void UserApp1SM_Foundhider(void)
   case ANT_CHANNEL_USERAPP_HIDE:
     {
     ANT_CHANNEL_USERAPP = ANT_CHANNEL_USERAPP_SEEK;
-    au8TestMessage_hide[0] = '0';
-
     break;
     }
     
@@ -743,11 +736,10 @@ static void UserApp1SM_Foundhider(void)
 /* Channel is open, so monitor data */
 static void UserApp1SM_hide(void)
 {
-
   static u8 au8DataContent_hide[] = "xxxxxxxxxxxxxxxx";
   static u8 au8LastAntData[ANT_APPLICATION_MESSAGE_BYTES] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
   static u8 au8TestMessage[] = {0x13, 0x19, 0x00, 0x00, 0xA5, 0, 0, 0};
-
+  static u8 au8TestMessage_hide[] = {0x13, 0x19, 0, 0, 0xA5, 0, 0, 0};
 
   /* Check for BUTTON0 to close channel */
   if(WasButtonPressed(BUTTON0))
