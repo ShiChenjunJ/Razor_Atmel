@@ -69,7 +69,7 @@ static u32 UserApp1_u32TickMsgCount = 0;             /* Counts the number of ANT
 static fnCode_type UserApp1_StateMachine;            /* The state machine function pointer */
 static u32 UserApp1_u32Timeout;                      /* Timeout counter used across states */
 
-
+static u32 u32Time1s = 0;
 /**********************************************************************************************************************
 Function Definitions
 **********************************************************************************************************************/
@@ -87,7 +87,7 @@ Function Definitions
 Function: UserApp1Initialize
 
 Description:
-Initializes the State Machine and its variables.
+Initializes the State Machine and its variables
 
 Requires:
   -
@@ -97,7 +97,7 @@ Promises:
 */
 void UserApp1Initialize(void)
 {
-  u8 au8WelcomeMessage[] = "ANT SLAVE DEMO";
+  u8 au8WelcomeMessage[] = "HeartRate DEMO";
   u8 au8Instructions[] = "B0 toggles radio";
   AntAssignChannelInfoType sAntSetupData;
   
@@ -123,6 +123,7 @@ void UserApp1Initialize(void)
   sAntSetupData.AntTxPower          = ANT_TX_POWER_USERAPP;
 
   sAntSetupData.AntNetwork = ANT_NETWORK_DEFAULT;
+  
   sAntSetupData.AntNetworkKey[0]=0xB9;
   sAntSetupData.AntNetworkKey[1]=0xA5;
   sAntSetupData.AntNetworkKey[2]=0x21;
@@ -177,15 +178,15 @@ void UserApp1RunActiveState(void)
 /*--------------------------------------------------------------------------------------------------------------------*/
 void Oscillogram(u8 *pu8HR,u8 u8HR)
 {
-  *(pu8HR+40)='\n';
-  *(pu8HR+41)='\r';
+  *(pu8HR+42)='\r';
+  *(pu8HR+41)='\n';
   
-  for(u8 a=0;a<40;a++)
+  for(u8 a=0;a<41;a++)
   {
     *(pu8HR+a)=' ';
   }
   
-  *(pu8HR+u8HR)='|';
+  *(pu8HR+u8HR)='*';
   
 }
 
@@ -276,14 +277,23 @@ static void UserApp1SM_ChannelOpen(void)
   static u8 au8DataContent[] = "xxxxxxxxxxxxxxxx";
   static u8 au8LastAntData[ANT_APPLICATION_MESSAGE_BYTES] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
   static u8 au8TestMessage[] = {0, 0, 0, 0, 0, 0, 0, 0};
+  /* Basic functional variables */
   static u8 u8HeartReat_D=0;
-  static u8 u8HeartReat_D_last=0;
-  static u8 au8HeartReat_ascii[]="HR:000";
-  static u8 au8Oscillogram[42];
-  static u8 u8HR_Level=0;
-  static u8 u8HR_Level_last=0;
+  static u8 u8HR_Level=0;/* 0~200bpm to 1~40levels*/
+  static u8 au8HeartReat_ascii[]="HR:000 ";
+  static u8 au8Oscillogram[43];
+  static bool bOpenOscillogram=FALSE;
+  
   bool bGotNewData;
 
+  /*use Button1 to open or close the heart Oscillogram*/
+  if(WasButtonPressed(BUTTON1))
+  {
+    ButtonAcknowledge(BUTTON1);
+    u32Time1s = G_u32SystemTime1ms;
+    bOpenOscillogram=!bOpenOscillogram;
+  } /* end if(WasButtonPressed(BUTTON1)) */
+  
   /* Check for BUTTON0 to close channel */
   if(WasButtonPressed(BUTTON0))
   {
@@ -308,17 +318,7 @@ static void UserApp1SM_ChannelOpen(void)
   {
      /* New data message: check what it is */
     if(G_eAntApiCurrentMessageClass == ANT_DATA)
-    {
-      if(u8HeartReat_D==u8HeartReat_D_last)
-        {
-          u8HR_Level=(u8HeartReat_D/5);
-          if(u8HR_Level==u8HR_Level_last)
-          {
-            Oscillogram(au8Oscillogram,u8HR_Level);
-            DebugPrintf(au8Oscillogram);
-          }
-          u8HR_Level_last=u8HR_Level;
-        }
+    { 
       UserApp1_u32DataMsgCount++;
       
       /* We are synced with a device, so blue is solid */
@@ -338,7 +338,7 @@ static void UserApp1SM_ChannelOpen(void)
           au8DataContent[2 * i + 1] = HexToASCIICharUpper(G_au8AntApiCurrentMessageBytes[i] % 16); 
         }
       }
-      u8HeartReat_D_last=u8HeartReat_D;
+      /* read the Heart rate and store it to wait for display */
       u8HeartReat_D = G_au8AntApiCurrentMessageBytes[7];
       au8HeartReat_ascii[3]=HexToASCIICharUpper(u8HeartReat_D/100);
       au8HeartReat_ascii[4]=HexToASCIICharUpper((u8HeartReat_D/10)%10);
@@ -442,6 +442,26 @@ static void UserApp1SM_ChannelOpen(void)
     UserApp1_u32Timeout = G_u32SystemTime1ms;
     UserApp1_StateMachine = UserApp1SM_WaitChannelClose;
   } /* if(AntRadioStatusChannel(ANT_CHANNEL_USERAPP) != ANT_OPEN) */
+  
+ /* new function added */
+   /* A waveform used to print heart rate */
+  if( IsTimeUp(&u32Time1s, TIME_PRINTF)&&bOpenOscillogram )
+  {
+    u8HR_Level=(u8HeartReat_D/5);
+    Oscillogram(au8Oscillogram,u8HR_Level);
+    DebugPrintf(au8Oscillogram);
+    u32Time1s = G_u32SystemTime1ms;     
+  }/*end if( IsTimeUp(&u32Time1s, TIME_PRINTF)&&bOpenOscillogram )*/
+  
+  /* Remind that the heartbeat is too fast,ledon led(white) */
+  if( u8HeartReat_D > HR_MAX )
+  {
+    LedOn(WHITE);
+  }
+  else
+  {
+    LedOff(WHITE);
+  }/*end if( u8HeartReat_D > HR_MAX )*/
       
 } /* end UserApp1SM_ChannelOpen() */
 

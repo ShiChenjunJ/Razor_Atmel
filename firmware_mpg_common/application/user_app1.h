@@ -41,7 +41,9 @@ Constants / Definitions
 #define ANT_TX_POWER_USERAPP            RADIO_TX_POWER_4DBM   /* RADIO_TX_POWER_0DBM, RADIO_TX_POWER_MINUS5DBM, RADIO_TX_POWER_MINUS10DBM, RADIO_TX_POWER_MINUS20DBM */
 
 #define TIMEOUT_VALUE                   (u32)2000             /* Maximum allowed timeout value for any transition state */
+#define TIME_PRINTF                     (u32)1000             /*Debug Printf the value of the heart rate every 1s*/
 
+#define HR_MAX                          (u8)120               /* The maximum of normal heart rate */
 /* G_u32UserAppFlags */
 #define _CHANNEL_SYNCED                 0x00000001            /* Set when channel is synced */
 
