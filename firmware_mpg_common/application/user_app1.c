@@ -276,24 +276,18 @@ static void UserApp1SM_ChannelOpen(void)
   static u8 au8TickMessage[] = "EVENT x\n\r";  /* "x" at index [6] will be replaced by the current code */
   static u8 au8DataContent[] = "xxxxxxxxxxxxxxxx";
   static u8 au8LastAntData[ANT_APPLICATION_MESSAGE_BYTES] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-  static u8 au8TestMessage[] = {0, 0, 0, 0, 0, 0, 0, 0};
+
+  static u8 au8ToHRMMessage[] = {0x46, 0xFF, 0xFF, 0xFF, 0xFF, 0x80, 0x00, 0x01};/* au8TestMessage[6] for Request Data Page*/
+  
   /* Basic functional variables */
   static u8 u8HeartReat_D=0;
   static u8 u8HR_Level=0;/* 0~200bpm to 1~40levels*/
-  static u8 au8HeartReat_ascii[]="HR:000 ";
+  static u8 au8HeartReat_ascii[]="HR:000 PAGE:?";
   static u8 au8Oscillogram[43];
   static bool bOpenOscillogram=FALSE;
   
   bool bGotNewData;
 
-  /*use Button1 to open or close the heart Oscillogram*/
-  if(WasButtonPressed(BUTTON1))
-  {
-    ButtonAcknowledge(BUTTON1);
-    u32Time1s = G_u32SystemTime1ms;
-    bOpenOscillogram=!bOpenOscillogram;
-  } /* end if(WasButtonPressed(BUTTON1)) */
-  
   /* Check for BUTTON0 to close channel */
   if(WasButtonPressed(BUTTON0))
   {
@@ -339,14 +333,18 @@ static void UserApp1SM_ChannelOpen(void)
         }
       }
       /* read the Heart rate and store it to wait for display */
+      /*HR*/
       u8HeartReat_D = G_au8AntApiCurrentMessageBytes[7];
       au8HeartReat_ascii[3]=HexToASCIICharUpper(u8HeartReat_D/100);
       au8HeartReat_ascii[4]=HexToASCIICharUpper((u8HeartReat_D/10)%10);
-      au8HeartReat_ascii[5]= HexToASCIICharUpper(u8HeartReat_D%10); 
+      au8HeartReat_ascii[5]= HexToASCIICharUpper(u8HeartReat_D%10);
+      /*page*/
+      au8HeartReat_ascii[12]= HexToASCIICharUpper(G_au8AntApiCurrentMessageBytes[0]);
+     
       if(bGotNewData)
       {
         
-        /* We got new data: show on LCD */
+        /* We got new data(Heart rate): show on LCD */
         LCDClearChars(LINE2_START_ADDR, 20); 
         LCDMessage(LINE2_START_ADDR, au8HeartReat_ascii);    
 
@@ -374,6 +372,7 @@ static void UserApp1SM_ChannelOpen(void)
         }
 
       } /* end if(bGotNewData) */
+      AntQueueAcknowledgedMessage(ANT_CHANNEL_USERAPP,au8ToHRMMessage);
     } /* end if(G_eAntApiCurrentMessageClass == ANT_DATA) */
     
     else if(G_eAntApiCurrentMessageClass == ANT_TICK)
@@ -462,7 +461,28 @@ static void UserApp1SM_ChannelOpen(void)
   {
     LedOff(WHITE);
   }/*end if( u8HeartReat_D > HR_MAX )*/
-      
+  
+  /*use Button1 to open or close the heart Oscillogram*/
+  if(WasButtonPressed(BUTTON1))
+  {
+    ButtonAcknowledge(BUTTON1);
+    u32Time1s = G_u32SystemTime1ms;
+    bOpenOscillogram=!bOpenOscillogram;
+  } /* end if(WasButtonPressed(BUTTON1)) */
+  
+  /* change the date page */
+  if(WasButtonPressed(BUTTON2))
+  {
+    ButtonAcknowledge(BUTTON2);
+    au8ToHRMMessage[DATA_PAGE]++;
+    
+    if(au8ToHRMMessage[DATA_PAGE] > DATA_PAGE_MAX )
+    {
+      au8ToHRMMessage[DATA_PAGE]=0;
+    }
+  }/* end if(WasButtonPressed(BUTTON2))*/
+  
+
 } /* end UserApp1SM_ChannelOpen() */
 
 
