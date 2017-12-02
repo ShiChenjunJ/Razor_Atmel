@@ -42,8 +42,8 @@ Constants / Definitions
 
 #define TIMEOUT_VALUE                   (u32)2000             /* Maximum allowed timeout value for any transition state */
 #define TIME_PRINTF                     (u32)1000             /*Debug Printf the value of the heart rate every 1s*/
-#define DATA_PAGE                       (u8)6
-#define DATA_PAGE_MAX                   (u8)7
+#define DATA_PAGE                       (u8)6                 /* Date page location at the arry which you need to transmit */
+#define DATA_PAGE_MAX                   (u8)7                 /* Page max numbber*/
 #define HR_MAX                          (u8)120               /* The maximum of normal heart rate */
 /* G_u32UserAppFlags */
 #define _CHANNEL_SYNCED                 0x00000001            /* Set when channel is synced */

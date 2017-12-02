@@ -277,7 +277,7 @@ static void UserApp1SM_ChannelOpen(void)
   static u8 au8DataContent[] = "xxxxxxxxxxxxxxxx";
   static u8 au8LastAntData[ANT_APPLICATION_MESSAGE_BYTES] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
-  static u8 au8ToHRMMessage[] = {0x46, 0xFF, 0xFF, 0xFF, 0xFF, 0x80, 0x00, 0x01};/* au8TestMessage[6] for Request Data Page*/
+  static u8 au8ToHRMMessage[] = {0x46, 0xFF, 0xFF, 0xFF, 0xFF, 0x80, 0x00, 0x01};/* transmit au8TestMessage[6] for Request Data Page*/
   
   /* Basic functional variables */
   static u8 u8HeartReat_D=0;
