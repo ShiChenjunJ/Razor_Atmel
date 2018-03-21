@@ -87,7 +87,20 @@ Promises:
 */
 void UserApp1Initialize(void)
 {
- 
+  AT91C_BASE_PIOA->PIO_PER    = PIOA_PER_ADD_INIT;
+  AT91C_BASE_PIOA->PIO_PDR    = PIOA_PDR_ADD_INIT;
+  AT91C_BASE_PIOA->PIO_OER    = PIOA_OER_ADD_INIT;
+  AT91C_BASE_PIOA->PIO_ODR    = PIOA_ODR_ADD_INIT;
+  AT91C_BASE_PIOA->PIO_SODR   = PIOA_SODR_ADD_INIT;
+  AT91C_BASE_PIOA->PIO_CODR   = PIOA_CODR_ADD_INIT;
+  
+  AT91C_BASE_PIOB->PIO_PER    = PIOB_PER_ADD_INIT;
+  AT91C_BASE_PIOB->PIO_PDR    = PIOB_PDR_ADD_INIT;
+  AT91C_BASE_PIOB->PIO_OER    = PIOB_OER_ADD_INIT;
+  AT91C_BASE_PIOB->PIO_ODR    = PIOB_ODR_ADD_INIT;
+  AT91C_BASE_PIOB->PIO_SODR   = PIOB_SODR_ADD_INIT;
+  AT91C_BASE_PIOB->PIO_CODR   = PIOB_CODR_ADD_INIT;
+  
   /* If good initialization, set state to Idle */
   if( 1 )
   {
@@ -127,6 +140,72 @@ void UserApp1RunActiveState(void)
 /* Private functions                                                                                                  */
 /*--------------------------------------------------------------------------------------------------------------------*/
 
+/*----------------------------------------------------------------------------------------------------------------------
+Function: ChangeSign
+
+Description
+When Button3 was pressed,change the sign source
+
+Requires:
+  - u8 u8Mode_
+
+Promises:
+  - Change the sign source and set the I/O
+*/
+void ChangeSign(u8 u8Mode_)
+{
+  switch(u8Mode_)
+  {
+  case 0:
+    AT91C_BASE_PIOA->PIO_SODR   = Silence_SODR;
+    AT91C_BASE_PIOA->PIO_CODR   = Silence_CODR;
+    break;
+    
+  case 1:
+    AT91C_BASE_PIOA->PIO_SODR   = Phone_SODR;
+    AT91C_BASE_PIOA->PIO_CODR   = Phone_CODR;
+    break;
+    
+  case 2:
+    AT91C_BASE_PIOA->PIO_SODR   = MIC_SODR;
+    AT91C_BASE_PIOA->PIO_CODR   = MIC_CODR;
+    break; 
+    
+  default:break;
+  }
+}/* end ChangeSign()*/
+
+/*----------------------------------------------------------------------------------------------------------------------
+Function: Sound_up
+
+Description
+When Buttn0 was pressed,turn up the sound
+
+Requires:
+  - 
+
+Promises:
+  - Give the INC a drop along signal 
+*/
+void Sound_up()
+{
+}/* end Sound_up()*/
+
+/*----------------------------------------------------------------------------------------------------------------------
+Function: 
+
+Description
+
+
+Requires:
+  - 
+
+Promises:
+  - 
+*/
+void Sound_down()
+{
+}/* end Sound_down */
 
 /**********************************************************************************************************************
 State Machine Function Definitions
