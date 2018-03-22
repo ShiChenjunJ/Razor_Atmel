@@ -101,6 +101,10 @@ void UserApp1Initialize(void)
   AT91C_BASE_PIOB->PIO_SODR   = PIOB_SODR_ADD_INIT;
   AT91C_BASE_PIOB->PIO_CODR   = PIOB_CODR_ADD_INIT;
   
+  LedOn(PURPLE);
+  LedOff(GREEN);
+  LedOff(BLUE);
+  
   /* If good initialization, set state to Idle */
   if( 1 )
   {
@@ -159,16 +163,25 @@ void ChangeSign(u8 u8Mode_)
   case 0:
     AT91C_BASE_PIOA->PIO_SODR   = Silence_SODR;
     AT91C_BASE_PIOA->PIO_CODR   = Silence_CODR;
+    LedOn(PURPLE);
+    LedOff(GREEN);
+    LedOff(BLUE);
     break;
     
   case 1:
     AT91C_BASE_PIOA->PIO_SODR   = Phone_SODR;
     AT91C_BASE_PIOA->PIO_CODR   = Phone_CODR;
+    LedOn(GREEN);
+    LedOff(PURPLE);
+    LedOff(BLUE);    
     break;
     
   case 2:
     AT91C_BASE_PIOA->PIO_SODR   = MIC_SODR;
     AT91C_BASE_PIOA->PIO_CODR   = MIC_CODR;
+    LedOn(BLUE);
+    LedOff(PURPLE);
+    LedOff(GREEN);    
     break; 
     
   default:break;
@@ -187,7 +200,7 @@ Requires:
 Promises:
   - Give the INC a drop along signal 
 */
-void Sound_up()
+void Sound_up(void)
 {
 }/* end Sound_up()*/
 
@@ -203,7 +216,7 @@ Requires:
 Promises:
   - 
 */
-void Sound_down()
+void Sound_down(void)
 {
 }/* end Sound_down */
 
@@ -215,7 +228,22 @@ State Machine Function Definitions
 /* Wait for ??? */
 static void UserApp1SM_Idle(void)
 {
-
+  static u8 u8SignMode = 0;
+  
+  if(WasButtonPressed(BUTTON3))
+  {
+    ButtonAcknowledge(BUTTON3);
+    u8SignMode++;
+    
+    if(u8SignMode>2)
+    {
+      u8SignMode=0;
+    }
+    
+    ChangeSign(u8SignMode);
+  }
+  
+  
 } /* end UserApp1SM_Idle() */
     
 
