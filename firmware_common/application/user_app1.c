@@ -202,6 +202,18 @@ Promises:
 */
 void Sound_up(void)
 {
+  AT91C_BASE_PIOA->PIO_SODR = Sound_u_SODR;
+  AT91C_BASE_PIOA->PIO_CODR = Sound_u_CODR;
+  
+  for(u8 i=0;i<20;i++)
+  {
+    AT91C_BASE_PIOA->PIO_SODR = INC_L_SODR;
+    AT91C_BASE_PIOA->PIO_CODR = INC_L_CODR;
+    Delay_us(10);
+    AT91C_BASE_PIOA->PIO_SODR = INC_H_SODR;
+    AT91C_BASE_PIOA->PIO_CODR = INC_H_CODR;    
+  }
+  
 }/* end Sound_up()*/
 
 /*----------------------------------------------------------------------------------------------------------------------
@@ -218,7 +230,43 @@ Promises:
 */
 void Sound_down(void)
 {
+  AT91C_BASE_PIOA->PIO_SODR = Sound_d_SODR;
+  AT91C_BASE_PIOA->PIO_CODR = Sound_d_CODR;
+  
+  for(u8 i=0;i<20;i++)
+  {
+    AT91C_BASE_PIOA->PIO_SODR = INC_L_SODR;
+    AT91C_BASE_PIOA->PIO_CODR = INC_L_CODR;
+    Delay_us(10);
+    AT91C_BASE_PIOA->PIO_SODR = INC_H_SODR;
+    AT91C_BASE_PIOA->PIO_CODR = INC_H_CODR;    
+  }
+  
 }/* end Sound_down */
+
+/*----------------------------------------------------------------------------------------------------------------------
+Function: 
+
+Description
+
+
+Requires:
+  - 
+
+Promises:
+  - 
+*/
+void Delay_us(u8 u8time_)
+{
+  u8 i=0;
+  u8 j=0;
+  for(i=0;i<u8time_;i++)
+  {
+    for(j=0;j<48;j++)
+    {
+    }
+  }
+}/* end Delay_us()*/
 
 /**********************************************************************************************************************
 State Machine Function Definitions
@@ -243,7 +291,17 @@ static void UserApp1SM_Idle(void)
     ChangeSign(u8SignMode);
   }
   
+  if(WasButtonPressed(BUTTON0))
+  {
+    ButtonAcknowledge(BUTTON0);
+    Sound_up();
+  }
   
+  if(WasButtonPressed(BUTTON1))
+  {
+    ButtonAcknowledge(BUTTON1);
+    Sound_down();
+  }
 } /* end UserApp1SM_Idle() */
     
 

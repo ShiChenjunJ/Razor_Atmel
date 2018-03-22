@@ -23,6 +23,7 @@ Header file for user_app1.c
 /**********************************************************************************************************************
 Type Definitions
 **********************************************************************************************************************/
+/*A16-A   A15-B   A14-CS  A13-C   A12 -INC   A11-UD*/
 #define PIOA_PER_ADD_INIT  (u32)0x8403F807
 #define PIOA_PDR_ADD_INIT  (u32)0x7BFC07F8
 #define PIOA_OER_ADD_INIT  (u32)0xBF55FFF9
@@ -49,6 +50,10 @@ Type Definitions
 #define Sound_d_SODR       (u32)0x00001000
 #define Sound_d_CODR       (u32)0x00004800
 
+#define INC_H_SODR         (u32)0x00001000
+#define INC_H_CODR         (u32)0x00000000
+#define INC_L_SODR         (u32)0x00000000
+#define INC_L_CODR         (u32)0x00001000
 
 /**********************************************************************************************************************
 Constants / Definitions
@@ -78,6 +83,7 @@ void UserApp1RunActiveState(void);
 void ChangeSign(u8 u8Mode_);
 void Sound_up(void);
 void Sound_down(void);
+void Delay_us(u8 u8time_);
 /***********************************************************************************************************************
 State Machine Declarations
 ***********************************************************************************************************************/
