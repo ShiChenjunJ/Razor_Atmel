@@ -31,8 +31,8 @@ Type Definitions
 #define PIOA_SODR_ADD_INIT (u32)0x8801C000
 #define PIOA_CODR_ADD_INIT (u32)0x30003800
 
-#define PIOB_PER_ADD_INIT  (u32)0x01BFFFB7
-#define PIOB_PDR_ADD_INIT  (u32)0x00400048
+#define PIOB_PER_ADD_INIT  (u32)0x01BFFFB8
+#define PIOB_PDR_ADD_INIT  (u32)0x00400040
 #define PIOB_OER_ADD_INIT  (u32)0x01BFFFF0
 #define PIOB_ODR_ADD_INIT  (u32)0x0040000F
 #define PIOB_SODR_ADD_INIT (u32)0x01BFFE00
@@ -40,10 +40,12 @@ Type Definitions
 
 #define Phone_SODR         (u32)0x00000000
 #define Phone_CODR         (u32)0x0001A000
-#define MIC_SODR           (u32)0x00080000
+#define MIC_SODR           (u32)0x00010000
 #define MIC_CODR           (u32)0x0000A000
 #define Silence_SODR       (u32)0x00008000
 #define Silence_CODR       (u32)0x00002000
+#define Test_v_SODR        (u32)0x0000A000
+#define Test_v_CODR        (u32)0x00010000
 
 #define Sound_u_SODR       (u32)0x00001800
 #define Sound_u_CODR       (u32)0x00004000
@@ -54,6 +56,11 @@ Type Definitions
 #define INC_H_CODR         (u32)0x00000000
 #define INC_L_SODR         (u32)0x00000000
 #define INC_L_CODR         (u32)0x00001000
+
+#define Re_sign_D          (u32)0x00000000
+#define Re_sign_C          (u32)0x00000010
+#define Re_adc_D           (u32)0x00000010
+#define Re_adc_C           (u32)0x00000000
 
 /**********************************************************************************************************************
 Constants / Definitions
@@ -84,6 +91,7 @@ void ChangeSign(u8 u8Mode_);
 void Sound_up(void);
 void Sound_down(void);
 void Delay_us(u8 u8time_);
+void Test(void);
 /***********************************************************************************************************************
 State Machine Declarations
 ***********************************************************************************************************************/

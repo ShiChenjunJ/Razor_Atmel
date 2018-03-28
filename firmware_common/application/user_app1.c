@@ -158,6 +158,8 @@ Promises:
 */
 void ChangeSign(u8 u8Mode_)
 {
+  AT91C_BASE_PIOB->PIO_SODR   = Re_sign_D;
+  AT91C_BASE_PIOB->PIO_CODR   = Re_sign_C;
   switch(u8Mode_)
   {
   case 0:
@@ -166,23 +168,27 @@ void ChangeSign(u8 u8Mode_)
     LedOn(PURPLE);
     LedOff(GREEN);
     LedOff(BLUE);
+    LedOff(WHITE);
     break;
     
   case 1:
-    AT91C_BASE_PIOA->PIO_SODR   = Phone_SODR;
-    AT91C_BASE_PIOA->PIO_CODR   = Phone_CODR;
-    LedOn(GREEN);
-    LedOff(PURPLE);
-    LedOff(BLUE);    
-    break;
-    
-  case 2:
     AT91C_BASE_PIOA->PIO_SODR   = MIC_SODR;
     AT91C_BASE_PIOA->PIO_CODR   = MIC_CODR;
     LedOn(BLUE);
     LedOff(PURPLE);
-    LedOff(GREEN);    
+    LedOff(GREEN);  
+    LedOff(WHITE);
     break; 
+    
+  case 2:
+    AT91C_BASE_PIOA->PIO_SODR   = Phone_SODR;
+    AT91C_BASE_PIOA->PIO_CODR   = Phone_CODR;
+    LedOn(GREEN);
+    LedOff(PURPLE);
+    LedOff(BLUE);
+    LedOff(WHITE);    
+    break;
+
     
   default:break;
   }
@@ -205,7 +211,7 @@ void Sound_up(void)
   AT91C_BASE_PIOA->PIO_SODR = Sound_u_SODR;
   AT91C_BASE_PIOA->PIO_CODR = Sound_u_CODR;
   
-  for(u8 i=0;i<20;i++)
+  for(u8 i=0;i<10;i++)
   {
     AT91C_BASE_PIOA->PIO_SODR = INC_L_SODR;
     AT91C_BASE_PIOA->PIO_CODR = INC_L_CODR;
@@ -233,7 +239,7 @@ void Sound_down(void)
   AT91C_BASE_PIOA->PIO_SODR = Sound_d_SODR;
   AT91C_BASE_PIOA->PIO_CODR = Sound_d_CODR;
   
-  for(u8 i=0;i<20;i++)
+  for(u8 i=0;i<10;i++)
   {
     AT91C_BASE_PIOA->PIO_SODR = INC_L_SODR;
     AT91C_BASE_PIOA->PIO_CODR = INC_L_CODR;
@@ -243,6 +249,32 @@ void Sound_down(void)
   }
   
 }/* end Sound_down */
+
+/*----------------------------------------------------------------------------------------------------------------------
+Function: 
+
+Description
+
+
+Requires:
+  - 
+
+Promises:
+  - 
+*/
+void Test(void)
+{
+
+  AT91C_BASE_PIOA->PIO_SODR = Test_v_SODR;
+  AT91C_BASE_PIOA->PIO_CODR = Test_v_CODR;
+  AT91C_BASE_PIOB->PIO_SODR = Re_adc_D;
+  AT91C_BASE_PIOB->PIO_CODR = Re_adc_C;
+  LedOff(BLUE);
+  LedOff(PURPLE);
+  LedOff(GREEN);  
+  LedOn(WHITE);
+
+}/* end Test*/
 
 /*----------------------------------------------------------------------------------------------------------------------
 Function: 
@@ -277,11 +309,14 @@ State Machine Function Definitions
 static void UserApp1SM_Idle(void)
 {
   static u8 u8SignMode = 0;
-  
+  static u16 u16TEST_V=0;
+  static bool bTest=FALSE;
+
   if(WasButtonPressed(BUTTON3))
   {
     ButtonAcknowledge(BUTTON3);
     u8SignMode++;
+    bTest=FALSE;
     
     if(u8SignMode>2)
     {
@@ -295,15 +330,38 @@ static void UserApp1SM_Idle(void)
   {
     ButtonAcknowledge(BUTTON0);
     Sound_up();
+    
+    if(bTest)
+    {
+      Adc12StartConversion(ADC12_BLADE_AN0);
+      u16TEST_V = AT91C_BASE_ADC12B->ADC12B_CDR[ADC12_BLADE_AN0];
+    }
   }
   
   if(WasButtonPressed(BUTTON1))
   {
     ButtonAcknowledge(BUTTON1);
     Sound_down();
+    
+    if(bTest)
+    {
+      Adc12StartConversion(ADC12_BLADE_AN0);
+      u16TEST_V = AT91C_BASE_ADC12B->ADC12B_CDR[ADC12_BLADE_AN0];
+    }
   }
+
+  if(WasButtonPressed(BUTTON2))
+  {
+    ButtonAcknowledge(BUTTON2);
+    bTest=TRUE;
+    Test();
+    Adc12StartConversion(ADC12_BLADE_AN0);
+    u16TEST_V = AT91C_BASE_ADC12B->ADC12B_CDR[ADC12_BLADE_AN0];
+  }
+  
 } /* end UserApp1SM_Idle() */
     
+
 
 /*-------------------------------------------------------------------------------------------------------------------*/
 /* Handle an error */
