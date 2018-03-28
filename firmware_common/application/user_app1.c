@@ -101,10 +101,18 @@ void UserApp1Initialize(void)
   AT91C_BASE_PIOB->PIO_SODR   = PIOB_SODR_ADD_INIT;
   AT91C_BASE_PIOB->PIO_CODR   = PIOB_CODR_ADD_INIT;
   
+  for(u8 i=0;i<10;i++)
+  {
+  Sound_down();
+  }
+  
   LedOn(PURPLE);
   LedOff(GREEN);
   LedOff(BLUE);
   
+  LCDCommand(LCD_CLEAR_CMD);
+  LCDMessage(LINE1_START_ADDR,"SIN:MUTE VOL:0");
+  LCDMessage(LINE2_START_ADDR,"ADC12B:0x***"); 
   /* If good initialization, set state to Idle */
   if( 1 )
   {
@@ -169,6 +177,7 @@ void ChangeSign(u8 u8Mode_)
     LedOff(GREEN);
     LedOff(BLUE);
     LedOff(WHITE);
+    LCDMessage(LINE1_START_ADDR,"SIN:MUTE");
     break;
     
   case 1:
@@ -178,6 +187,7 @@ void ChangeSign(u8 u8Mode_)
     LedOff(PURPLE);
     LedOff(GREEN);  
     LedOff(WHITE);
+    LCDMessage(LINE1_START_ADDR,"SIN:MIC");
     break; 
     
   case 2:
@@ -186,7 +196,8 @@ void ChangeSign(u8 u8Mode_)
     LedOn(GREEN);
     LedOff(PURPLE);
     LedOff(BLUE);
-    LedOff(WHITE);    
+    LedOff(WHITE);
+    LCDMessage(LINE1_START_ADDR,"SIN:PHO");
     break;
 
     
@@ -264,7 +275,6 @@ Promises:
 */
 void Test(void)
 {
-
   AT91C_BASE_PIOA->PIO_SODR = Test_v_SODR;
   AT91C_BASE_PIOA->PIO_CODR = Test_v_CODR;
   AT91C_BASE_PIOB->PIO_SODR = Re_adc_D;
@@ -273,7 +283,7 @@ void Test(void)
   LedOff(PURPLE);
   LedOff(GREEN);  
   LedOn(WHITE);
-
+  LCDMessage(LINE1_START_ADDR,"SIN:TEST");
 }/* end Test*/
 
 /*----------------------------------------------------------------------------------------------------------------------
@@ -309,14 +319,18 @@ State Machine Function Definitions
 static void UserApp1SM_Idle(void)
 {
   static u8 u8SignMode = 0;
-  static u16 u16TEST_V=0;
+  static u16 u16TEST_V=0; 
+  static u8 au8Vol[1]={'0'};
+  static u8 au8ADC[7]={'0','0','0',' ',' ',' ',' '};
   static bool bTest=FALSE;
-
+   
+  LedOff(RED);
+  
   if(WasButtonPressed(BUTTON3))
   {
     ButtonAcknowledge(BUTTON3);
+    LedOn(RED);
     u8SignMode++;
-    bTest=FALSE;
     
     if(u8SignMode>2)
     {
@@ -326,39 +340,65 @@ static void UserApp1SM_Idle(void)
     ChangeSign(u8SignMode);
   }
   
+  if(WasButtonPressed(BUTTON2))
+  {
+    ButtonAcknowledge(BUTTON2);
+    LedOn(RED);
+    Test();
+    bTest=TRUE;
+    LCDMessage(LINE2_START_ADDR+9,&au8ADC[0]);  
+  }  
+  
   if(WasButtonPressed(BUTTON0))
   {
     ButtonAcknowledge(BUTTON0);
-    Sound_up();
+    LedOn(RED);
+    au8Vol[0]++;
     
-    if(bTest)
+    if(au8Vol[0]<='9'&&au8Vol[0]>='0')
     {
-      Adc12StartConversion(ADC12_BLADE_AN0);
-      u16TEST_V = AT91C_BASE_ADC12B->ADC12B_CDR[ADC12_BLADE_AN0];
+      LCDMessage(LINE1_START_ADDR+13,&au8Vol[0]);
+      LCDClearChars(LINE1_START_ADDR+14,6);
     }
+    else
+    {
+      au8Vol[0]='9';
+    }
+    
+    Sound_up();
   }
   
   if(WasButtonPressed(BUTTON1))
   {
     ButtonAcknowledge(BUTTON1);
-    Sound_down();
-    
-    if(bTest)
+    LedOn(RED);
+    au8Vol[0]--;
+
+    if(au8Vol[0]<='9'&au8Vol[0]>='0')
     {
-      Adc12StartConversion(ADC12_BLADE_AN0);
+      LCDMessage(LINE1_START_ADDR+13,&au8Vol[0]);
+      LCDClearChars(LINE1_START_ADDR+14,6);
+    }
+    else
+    {
+      au8Vol[0]='0';
+    }    
+    
+    Sound_down();
+  }
+  
+  if(bTest)
+  {
+    if(Adc12StartConversion(ADC12_BLADE_AN0))
+    {
       u16TEST_V = AT91C_BASE_ADC12B->ADC12B_CDR[ADC12_BLADE_AN0];
+      au8ADC[0]=HexToASCIICharUpper(u16TEST_V/16/16);
+      au8ADC[1]=HexToASCIICharUpper(u16TEST_V/16%16);
+      au8ADC[2]=HexToASCIICharUpper(u16TEST_V%16);
+      bTest=TRUE;
     }
   }
 
-  if(WasButtonPressed(BUTTON2))
-  {
-    ButtonAcknowledge(BUTTON2);
-    bTest=TRUE;
-    Test();
-    Adc12StartConversion(ADC12_BLADE_AN0);
-    u16TEST_V = AT91C_BASE_ADC12B->ADC12B_CDR[ADC12_BLADE_AN0];
-  }
-  
 } /* end UserApp1SM_Idle() */
     
 
