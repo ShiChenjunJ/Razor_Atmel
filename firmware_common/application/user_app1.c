@@ -60,6 +60,11 @@ Variable names shall start with "UserApp1_" and be declared as static.
 static fnCode_type UserApp1_StateMachine;            /* The state machine function pointer */
 //static u32 UserApp1_u32Timeout;                      /* Timeout counter used across states */
 
+ static SignType SignMode = Silence;
+ static u16 u16TEST_V=0; 
+ static u8 au8Vol[1]={'0'};
+ static u8 au8ADC[7]={'0','0','0',' ',' ',' ',' '};
+ static bool bTest=FALSE;
 
 /**********************************************************************************************************************
 Function Definitions
@@ -159,50 +164,72 @@ Description
 When Button3 was pressed,change the sign source
 
 Requires:
-  - u8 u8Mode_
+
 
 Promises:
   - Change the sign source and set the I/O
 */
-void ChangeSign(u8 u8Mode_)
+SignType ChangeMode(SignType Mode_)
 {
-  AT91C_BASE_PIOB->PIO_SODR   = Re_sign_D;
-  AT91C_BASE_PIOB->PIO_CODR   = Re_sign_C;
-  switch(u8Mode_)
+  SignType Mode;
+  Mode=Mode_;
+  
+  if(WasButtonPressed(BUTTON3))
   {
-  case 0:
-    AT91C_BASE_PIOA->PIO_SODR   = Silence_SODR;
-    AT91C_BASE_PIOA->PIO_CODR   = Silence_CODR;
-    LedOn(PURPLE);
-    LedOff(GREEN);
-    LedOff(BLUE);
-    LedOff(WHITE);
-    LCDMessage(LINE1_START_ADDR,"SIN:MUTE");
-    break;
-    
-  case 1:
-    AT91C_BASE_PIOA->PIO_SODR   = MIC_SODR;
-    AT91C_BASE_PIOA->PIO_CODR   = MIC_CODR;
-    LedOn(BLUE);
-    LedOff(PURPLE);
-    LedOff(GREEN);  
-    LedOff(WHITE);
-    LCDMessage(LINE1_START_ADDR,"SIN:MIC");
-    break; 
-    
-  case 2:
-    AT91C_BASE_PIOA->PIO_SODR   = Phone_SODR;
-    AT91C_BASE_PIOA->PIO_CODR   = Phone_CODR;
-    LedOn(GREEN);
-    LedOff(PURPLE);
-    LedOff(BLUE);
-    LedOff(WHITE);
-    LCDMessage(LINE1_START_ADDR,"SIN:PHO");
-    break;
+    ButtonAcknowledge(BUTTON3);
 
+    if(Mode>2)
+    {
+      AT91C_BASE_PIOB->PIO_SODR   = Re_sign_D;
+      AT91C_BASE_PIOB->PIO_CODR   = Re_sign_C;
+      Mode=Silence;
+    }
+    else
+    {
+      Mode++;
+      if(Mode>2)
+      {
+        Mode=Silence;
+      }
+    }
     
-  default:break;
+    switch(Mode)
+     {
+      case Silence:
+        AT91C_BASE_PIOA->PIO_SODR   = Silence_SODR;
+        AT91C_BASE_PIOA->PIO_CODR   = Silence_CODR;
+        LedOn(PURPLE);
+        LedOff(GREEN);
+        LedOff(BLUE);
+        LedOff(WHITE);
+        LCDMessage(LINE1_START_ADDR,"SIN:MUTE");
+        break;
+        
+      case MIC:
+        AT91C_BASE_PIOA->PIO_SODR   = MIC_SODR;
+        AT91C_BASE_PIOA->PIO_CODR   = MIC_CODR;
+        LedOn(BLUE);
+        LedOff(PURPLE);
+        LedOff(GREEN);  
+        LedOff(WHITE);
+        LCDMessage(LINE1_START_ADDR,"SIN:MIC");
+        break; 
+        
+      case Phone:
+        AT91C_BASE_PIOA->PIO_SODR   = Phone_SODR;
+        AT91C_BASE_PIOA->PIO_CODR   = Phone_CODR;
+        LedOn(GREEN);
+        LedOff(PURPLE);
+        LedOff(BLUE);
+        LedOff(WHITE);
+        LCDMessage(LINE1_START_ADDR,"SIN:PHO");
+        break;
+
+      default:break;
+     }
   }
+  
+  return Mode;
 }/* end ChangeSign()*/
 
 /*----------------------------------------------------------------------------------------------------------------------
@@ -273,18 +300,17 @@ Requires:
 Promises:
   - 
 */
-void Test(void)
+void Delay_us(u8 u8time_)
 {
-  AT91C_BASE_PIOA->PIO_SODR = Test_v_SODR;
-  AT91C_BASE_PIOA->PIO_CODR = Test_v_CODR;
-  AT91C_BASE_PIOB->PIO_SODR = Re_adc_D;
-  AT91C_BASE_PIOB->PIO_CODR = Re_adc_C;
-  LedOff(BLUE);
-  LedOff(PURPLE);
-  LedOff(GREEN);  
-  LedOn(WHITE);
-  LCDMessage(LINE1_START_ADDR,"SIN:TEST");
-}/* end Test*/
+  u8 i=0;
+  u8 j=0;
+  for(i=0;i<u8time_;i++)
+  {
+    for(j=0;j<48;j++)
+    {
+    }
+  }
+}/* end Delay_us()*/
 
 /*----------------------------------------------------------------------------------------------------------------------
 Function: 
@@ -298,61 +324,55 @@ Requires:
 Promises:
   - 
 */
-void Delay_us(u8 u8time_)
+void Test(void)
 {
-  u8 i=0;
-  u8 j=0;
-  for(i=0;i<u8time_;i++)
-  {
-    for(j=0;j<48;j++)
-    {
-    }
-  }
-}/* end Delay_us()*/
-
-/**********************************************************************************************************************
-State Machine Function Definitions
-**********************************************************************************************************************/
-
-/*-------------------------------------------------------------------------------------------------------------------*/
-/* Wait for ??? */
-static void UserApp1SM_Idle(void)
-{
-  static u8 u8SignMode = 0;
-  static u16 u16TEST_V=0; 
-  static u8 au8Vol[1]={'0'};
-  static u8 au8ADC[7]={'0','0','0',' ',' ',' ',' '};
-  static bool bTest=FALSE;
-   
-  LedOff(RED);
-  
-  if(WasButtonPressed(BUTTON3))
-  {
-    ButtonAcknowledge(BUTTON3);
-    LedOn(RED);
-    u8SignMode++;
-    
-    if(u8SignMode>2)
-    {
-      u8SignMode=0;
-    }
-    
-    ChangeSign(u8SignMode);
-  }
-  
   if(WasButtonPressed(BUTTON2))
   {
     ButtonAcknowledge(BUTTON2);
-    LedOn(RED);
-    Test();
-    bTest=TRUE;
-    LCDMessage(LINE2_START_ADDR+9,&au8ADC[0]);  
+    LCDMessage(LINE1_START_ADDR,"SIN:TEST");
+    AT91C_BASE_PIOB->PIO_SODR = Re_adc_D;
+    AT91C_BASE_PIOB->PIO_CODR = Re_adc_C;
+    AT91C_BASE_PIOA->PIO_SODR = Test_v_SODR;
+    AT91C_BASE_PIOA->PIO_CODR = Test_v_CODR;
+    LedOff(BLUE);
+    LedOff(PURPLE);
+    LedOff(GREEN);  
+    LedOn(WHITE); 
+    SignMode=Test_V;
+    bTest=TRUE;   
   }  
   
+    if(bTest)
+  {
+    if(Adc12StartConversion(ADC12_BLADE_AN0))
+    {
+      u16TEST_V = AT91C_BASE_ADC12B->ADC12B_CDR[ADC12_BLADE_AN0];
+      au8ADC[0]=HexToASCIICharUpper(u16TEST_V/16/16);
+      au8ADC[1]=HexToASCIICharUpper(u16TEST_V/16%16);
+      au8ADC[2]=HexToASCIICharUpper(u16TEST_V%16);
+      LCDMessage(LINE2_START_ADDR+9,&au8ADC[0]); 
+      bTest=FALSE;
+    }
+  }
+}
+
+/*----------------------------------------------------------------------------------------------------------------------
+Function: 
+
+Description
+
+
+Requires:
+  - 
+
+Promises:
+  - 
+*/
+void Sound(void)
+{
   if(WasButtonPressed(BUTTON0))
   {
     ButtonAcknowledge(BUTTON0);
-    LedOn(RED);
     au8Vol[0]++;
     
     if(au8Vol[0]<='9'&&au8Vol[0]>='0')
@@ -364,14 +384,25 @@ static void UserApp1SM_Idle(void)
     {
       au8Vol[0]='9';
     }
+
+    /*up*/
+    AT91C_BASE_PIOA->PIO_SODR = Sound_u_SODR;
+    AT91C_BASE_PIOA->PIO_CODR = Sound_u_CODR;
     
-    Sound_up();
+    for(u8 i=0;i<10;i++)
+    {
+      AT91C_BASE_PIOA->PIO_SODR = INC_L_SODR;
+      AT91C_BASE_PIOA->PIO_CODR = INC_L_CODR;
+      Delay_us(10);
+      AT91C_BASE_PIOA->PIO_SODR = INC_H_SODR;
+      AT91C_BASE_PIOA->PIO_CODR = INC_H_CODR;    
+    }
+    
   }
   
   if(WasButtonPressed(BUTTON1))
   {
     ButtonAcknowledge(BUTTON1);
-    LedOn(RED);
     au8Vol[0]--;
 
     if(au8Vol[0]<='9'&au8Vol[0]>='0')
@@ -386,19 +417,47 @@ static void UserApp1SM_Idle(void)
     
     Sound_down();
   }
-  
-  if(bTest)
-  {
-    if(Adc12StartConversion(ADC12_BLADE_AN0))
-    {
-      u16TEST_V = AT91C_BASE_ADC12B->ADC12B_CDR[ADC12_BLADE_AN0];
-      au8ADC[0]=HexToASCIICharUpper(u16TEST_V/16/16);
-      au8ADC[1]=HexToASCIICharUpper(u16TEST_V/16%16);
-      au8ADC[2]=HexToASCIICharUpper(u16TEST_V%16);
-      bTest=TRUE;
-    }
-  }
+}
 
+/*----------------------------------------------------------------------------------------------------------------------
+Function: 
+
+Description
+
+
+Requires:
+  - 
+
+Promises:
+  - 
+*/
+void RedLed(void)
+{
+  if(IsButtonPressed(BUTTON0)||
+     IsButtonPressed(BUTTON1)||
+     IsButtonPressed(BUTTON2)||
+     IsButtonPressed(BUTTON3))
+  {
+    LedOn(RED);
+  }
+  else
+  {
+    LedOff(RED);
+  }
+}
+
+/**********************************************************************************************************************
+State Machine Function Definitions
+**********************************************************************************************************************/
+
+/*-------------------------------------------------------------------------------------------------------------------*/
+/* Wait for ??? */
+static void UserApp1SM_Idle(void)
+{
+  Test();
+  SignMode=ChangeMode(SignMode);
+  Sound();
+  RedLed();
 } /* end UserApp1SM_Idle() */
     
 
