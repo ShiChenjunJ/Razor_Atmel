@@ -161,13 +161,13 @@ void UserApp1RunActiveState(void)
 Function: ChangeSign
 
 Description
-When Button3 was pressed,change the sign source
+When Button3 was pressed,change the sign source among Slience,MIC,and Phone
 
 Requires:
-
+  - the last Mode
 
 Promises:
-  - Change the sign source and set the I/O
+  - change the Mode
 */
 SignType ChangeMode(SignType Mode_)
 {
@@ -183,7 +183,7 @@ SignType ChangeMode(SignType Mode_)
       AT91C_BASE_PIOB->PIO_SODR   = Re_sign_D;
       AT91C_BASE_PIOB->PIO_CODR   = Re_sign_C;
       Mode=Silence;
-    }
+    }/*when last Mode is Test_V*/
     else
     {
       Mode++;
@@ -191,10 +191,11 @@ SignType ChangeMode(SignType Mode_)
       {
         Mode=Silence;
       }
-    }
+    }/*end if*/
     
     switch(Mode)
      {
+       /* change the Mode*/
       case Silence:
         AT91C_BASE_PIOA->PIO_SODR   = Silence_SODR;
         AT91C_BASE_PIOA->PIO_CODR   = Silence_CODR;
@@ -227,7 +228,7 @@ SignType ChangeMode(SignType Mode_)
 
       default:break;
      }
-  }
+  }/*end switch*/
   
   return Mode;
 }/* end ChangeSign()*/
@@ -236,7 +237,7 @@ SignType ChangeMode(SignType Mode_)
 Function: Sound_up
 
 Description
-When Buttn0 was pressed,turn up the sound
+  -When Button0 was pressed,turn up the sound.
 
 Requires:
   - 
@@ -253,18 +254,19 @@ void Sound_up(void)
   {
     AT91C_BASE_PIOA->PIO_SODR = INC_L_SODR;
     AT91C_BASE_PIOA->PIO_CODR = INC_L_CODR;
-    Delay_us(10);
+    Delay_us(5);
     AT91C_BASE_PIOA->PIO_SODR = INC_H_SODR;
-    AT91C_BASE_PIOA->PIO_CODR = INC_H_CODR;    
+    AT91C_BASE_PIOA->PIO_CODR = INC_H_CODR; 
+    Delay_us(5);
   }
   
 }/* end Sound_up()*/
 
 /*----------------------------------------------------------------------------------------------------------------------
-Function: 
+Function: Sound_down
 
 Description
-
+  -When Button1 was pressed,turn down the sound.
 
 Requires:
   - 
@@ -281,21 +283,22 @@ void Sound_down(void)
   {
     AT91C_BASE_PIOA->PIO_SODR = INC_L_SODR;
     AT91C_BASE_PIOA->PIO_CODR = INC_L_CODR;
-    Delay_us(10);
+    Delay_us(5);
     AT91C_BASE_PIOA->PIO_SODR = INC_H_SODR;
-    AT91C_BASE_PIOA->PIO_CODR = INC_H_CODR;    
+    AT91C_BASE_PIOA->PIO_CODR = INC_H_CODR; 
+    Delay_us(5);
   }
   
 }/* end Sound_down */
 
 /*----------------------------------------------------------------------------------------------------------------------
-Function: 
+Function: Delay_us
 
 Description
-
+  -Delay time = u8time_*1us
 
 Requires:
-  - 
+  - u8time
 
 Promises:
   - 
@@ -313,10 +316,10 @@ void Delay_us(u8 u8time_)
 }/* end Delay_us()*/
 
 /*----------------------------------------------------------------------------------------------------------------------
-Function: 
+Function: Test
 
 Description
-
+  - when button2 was pressed,
 
 Requires:
   - 
@@ -383,22 +386,10 @@ void Sound(void)
     else
     {
       au8Vol[0]='9';
-    }
+    }/*end LCD*/
 
-    /*up*/
-    AT91C_BASE_PIOA->PIO_SODR = Sound_u_SODR;
-    AT91C_BASE_PIOA->PIO_CODR = Sound_u_CODR;
-    
-    for(u8 i=0;i<10;i++)
-    {
-      AT91C_BASE_PIOA->PIO_SODR = INC_L_SODR;
-      AT91C_BASE_PIOA->PIO_CODR = INC_L_CODR;
-      Delay_us(10);
-      AT91C_BASE_PIOA->PIO_SODR = INC_H_SODR;
-      AT91C_BASE_PIOA->PIO_CODR = INC_H_CODR;    
-    }
-    
-  }
+   Sound_up();
+  }/*end Button1*/
   
   if(WasButtonPressed(BUTTON1))
   {
@@ -413,17 +404,18 @@ void Sound(void)
     else
     {
       au8Vol[0]='0';
-    }    
+    }/*end LCD*/ 
     
     Sound_down();
-  }
+  }/*end Button1*/
+  
 }
 
 /*----------------------------------------------------------------------------------------------------------------------
 Function: 
 
 Description
-
+  - when one of the buttons is pressed,the RedLed is On.
 
 Requires:
   - 
@@ -454,10 +446,10 @@ State Machine Function Definitions
 /* Wait for ??? */
 static void UserApp1SM_Idle(void)
 {
-  Test();
-  SignMode=ChangeMode(SignMode);
-  Sound();
-  RedLed();
+  Test();/*if Button2 was pressed,*/
+  SignMode=ChangeMode(SignMode);/**/
+  Sound();/*Adjust the volume*/
+  RedLed();/*the Red on because one button is pressed*/
 } /* end UserApp1SM_Idle() */
     
 
